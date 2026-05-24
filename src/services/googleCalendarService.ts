@@ -1,200 +1,56 @@
 /**
  * Google Calendar Service
  * ─────────────────────────────────────────────────────────────────────────────
- * Infrastructure layer for future Google Calendar integration.
+ * Real implementation using Google Identity Services (GSI) token flow
+ * and the Google Calendar API v3.
  *
- * Current state: all async functions are safe stubs — they log clearly and
- * return empty results rather than throwing, so the rest of the app stays
- * stable while mock data is in use.
- *
- * Phase 2 checklist (when ready to go live):
- *   ① Set VITE_GOOGLE_CLIENT_ID and VITE_GOOGLE_API_KEY in .env.local
- *   ② Call loadGoogleScripts() once at app startup (e.g. in main.tsx)
- *   ③ Replace the stub bodies below with the commented-out real implementations
- *   ④ Store the access token in memory only (never localStorage / sessionStorage)
- *   ⑤ Wire isConnected state into EventsCard via context or lifted state
+ * Token is stored in module memory only — never written to localStorage
+ * or sessionStorage.
  */
 
 import type { CalendarEvent, EventCategory } from '../types';
 import {
   GOOGLE_CLIENT_ID,
-  GOOGLE_API_KEY,
   GOOGLE_CALENDAR_SCOPE,
   isGoogleConfigured,
 } from '../config/google';
 
 // ---------------------------------------------------------------------------
-// Script loading
+// Minimal GSI type declarations (no npm package needed)
 // ---------------------------------------------------------------------------
 
-/**
- * Dynamically inject the Google Identity Services (GSI) and Google API
- * Client Library scripts into the page.
- *
- * Call once at app startup, before any auth attempt.
- * Returns a Promise that resolves when both scripts are ready.
- *
- * TODO (Phase 2): Call this from main.tsx or App.tsx on mount.
- */
-export function loadGoogleScripts(): Promise<void> {
-  // TODO (Phase 2): uncomment and use the real implementation below
-  console.info('[SmartDay] loadGoogleScripts: stub — scripts not loaded yet');
-  return Promise.resolve();
-
-  /*
-  return new Promise((resolve, reject) => {
-    // 1. Google Identity Services (handles OAuth popup / redirect)
-    const gsiScript = document.createElement('script');
-    gsiScript.src = 'https://accounts.google.com/gsi/client';
-    gsiScript.async = true;
-    gsiScript.defer = true;
-    gsiScript.onload = () => {
-      // 2. Google API client library (used for Calendar API calls)
-      const gapiScript = document.createElement('script');
-      gapiScript.src = 'https://apis.google.com/js/api.js';
-      gapiScript.async = true;
-      gapiScript.defer = true;
-      gapiScript.onload = () => resolve();
-      gapiScript.onerror = () => reject(new Error('Failed to load Google API script'));
-      document.head.appendChild(gapiScript);
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient(config: TokenClientConfig): TokenClient;
+          revoke(token: string, callback: () => void): void;
+        };
+      };
     };
-    gsiScript.onerror = () => reject(new Error('Failed to load GSI script'));
-    document.head.appendChild(gsiScript);
-  });
-  */
+  }
 }
 
-// ---------------------------------------------------------------------------
-// Auth
-// ---------------------------------------------------------------------------
-
-/**
- * Start the Google OAuth 2.0 consent flow using Google Identity Services.
- *
- * On success the user grants calendar.readonly access and an access token
- * is returned via the callback. Store it in module-level memory only.
- *
- * TODO (Phase 2): Replace stub with real GSI token client.
- */
-export async function connectGoogleCalendar(): Promise<void> {
-  if (!isGoogleConfigured) {
-    console.warn(
-      '[SmartDay] connectGoogleCalendar: VITE_GOOGLE_CLIENT_ID or VITE_GOOGLE_API_KEY is missing.',
-      'Set them in .env.local — see .env.example for the required keys.',
-    );
-    return;
-  }
-
-  // TODO (Phase 2): implement using Google Identity Services
-  /*
-  const client = window.google.accounts.oauth2.initTokenClient({
-    client_id: GOOGLE_CLIENT_ID!,
-    scope: GOOGLE_CALENDAR_SCOPE,
-    callback: (tokenResponse) => {
-      if (tokenResponse.error) {
-        console.error('[SmartDay] OAuth error:', tokenResponse.error);
-        return;
-      }
-      _accessToken = tokenResponse.access_token;
-      console.info('[SmartDay] Google Calendar connected successfully');
-    },
-  });
-  client.requestAccessToken();
-  */
-
-  console.info('[SmartDay] connectGoogleCalendar: stub — OAuth not implemented yet');
+interface TokenClientConfig {
+  client_id: string;
+  scope: string;
+  callback: (response: TokenResponse) => void;
+  error_callback?: (error: { type: string }) => void;
 }
 
-/**
- * Revoke the stored OAuth token and clear local auth state.
- *
- * TODO (Phase 2): Call google.accounts.oauth2.revoke() and clear _accessToken.
- */
-export async function disconnectGoogleCalendar(): Promise<void> {
-  if (!_accessToken) return;
-
-  // TODO (Phase 2): implement token revocation
-  /*
-  window.google.accounts.oauth2.revoke(_accessToken, () => {
-    console.info('[SmartDay] Google Calendar disconnected');
-  });
-  _accessToken = null;
-  */
-
-  console.info('[SmartDay] disconnectGoogleCalendar: stub — revocation not implemented yet');
+interface TokenClient {
+  requestAccessToken(): void;
 }
 
-/** In-memory token storage — never persisted to disk or localStorage. */
-let _accessToken: string | null = null;
-
-// ---------------------------------------------------------------------------
-// Events
-// ---------------------------------------------------------------------------
-
-/**
- * Fetch events from a Google Calendar using the Calendar API v3.
- *
- * Returns an empty array when credentials are missing or the stub is active,
- * so the app continues to show mock data without errors.
- *
- * @param calendarId - Calendar to fetch from (default: 'primary')
- * @param timeMin    - ISO 8601 lower bound (default: start of today)
- * @param timeMax    - ISO 8601 upper bound (default: 14 days from now)
- *
- * TODO (Phase 2): Replace stub with real fetch call.
- */
-export async function fetchGoogleCalendarEvents(
-  _calendarId: string = 'primary',
-  _timeMin?: string,
-  _timeMax?: string,
-): Promise<CalendarEvent[]> {
-  if (!isGoogleConfigured) {
-    console.warn('[SmartDay] fetchGoogleCalendarEvents: Google not configured — returning []');
-    return [];
-  }
-
-  if (!_accessToken) {
-    console.warn('[SmartDay] fetchGoogleCalendarEvents: no access token — call connectGoogleCalendar() first');
-    return [];
-  }
-
-  // TODO (Phase 2): implement real fetch
-  /*
-  const timeMin = _timeMin ?? startOfToday();
-  const timeMax = _timeMax ?? plusDays(14);
-
-  const url = new URL(
-    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(_calendarId)}/events`,
-  );
-  url.searchParams.set('timeMin', timeMin);
-  url.searchParams.set('timeMax', timeMax);
-  url.searchParams.set('singleEvents', 'true');
-  url.searchParams.set('orderBy', 'startTime');
-  url.searchParams.set('key', GOOGLE_API_KEY!);
-
-  const res = await fetch(url.toString(), {
-    headers: { Authorization: `Bearer ${_accessToken}` },
-  });
-
-  if (!res.ok) {
-    console.error('[SmartDay] Calendar API error:', res.status, await res.text());
-    return [];
-  }
-
-  const data = await res.json();
-  return (data.items ?? []).map(mapGoogleEventToSmartDayEvent);
-  */
-
-  console.info('[SmartDay] fetchGoogleCalendarEvents: stub — returning []');
-  return [];
+interface TokenResponse {
+  access_token?: string;
+  error?: string;
+  error_description?: string;
 }
 
-// ---------------------------------------------------------------------------
-// Mapping
-// ---------------------------------------------------------------------------
-
-/** Raw event shape returned by Google Calendar API v3 (partial). */
-interface GoogleCalendarEventRaw {
+/** Raw Google Calendar API v3 event (partial). */
+interface GCalEvent {
   id: string;
   summary?: string;
   description?: string;
@@ -202,32 +58,157 @@ interface GoogleCalendarEventRaw {
   start: { dateTime?: string; date?: string };
   end:   { dateTime?: string; date?: string };
   colorId?: string;
-  extendedProperties?: {
-    private?: Record<string, string>;
-    shared?:  Record<string, string>;
-  };
+}
+
+// ---------------------------------------------------------------------------
+// Module-level auth state (memory only)
+// ---------------------------------------------------------------------------
+
+let _accessToken: string | null = null;
+
+export function getIsConnected(): boolean {
+  return _accessToken !== null;
+}
+
+// ---------------------------------------------------------------------------
+// Script loading
+// ---------------------------------------------------------------------------
+
+/**
+ * Inject the Google Identity Services script once.
+ * Safe to call multiple times — resolves immediately if already loaded.
+ */
+export function loadGsiScript(): Promise<void> {
+  if (window.google?.accounts) return Promise.resolve();
+
+  return new Promise((resolve, reject) => {
+    if (document.querySelector('script[src*="accounts.google.com/gsi"]')) {
+      // Script tag exists but may not be done yet — poll for google object
+      const id = setInterval(() => {
+        if (window.google?.accounts) { clearInterval(id); resolve(); }
+      }, 50);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src   = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    script.onerror = () =>
+      reject(new Error('נכשלה טעינת ספריית Google Identity Services.'));
+    document.head.appendChild(script);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+/**
+ * Open the Google OAuth consent popup and store the access token.
+ * Wraps the GSI callback-based API in a Promise.
+ *
+ * Resolves when the token is received successfully.
+ * Rejects with a Hebrew error string on failure.
+ */
+export async function connectGoogleCalendar(): Promise<void> {
+  if (!isGoogleConfigured) {
+    throw new Error('חיבור Google Calendar עדיין לא הוגדר בסביבת הפיתוח.');
+  }
+
+  await loadGsiScript();
+
+  return new Promise<void>((resolve, reject) => {
+    const client = window.google!.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID!,
+      scope: GOOGLE_CALENDAR_SCOPE,
+      callback: (response: TokenResponse) => {
+        if (!response.access_token) {
+          const msg = response.error === 'access_denied'
+            ? 'ההרשאה נדחתה. נסה שוב ואשר גישה ליומן.'
+            : `שגיאת התחברות: ${response.error_description ?? response.error ?? 'לא ידוע'}`;
+          reject(new Error(msg));
+          return;
+        }
+        _accessToken = response.access_token;
+        resolve();
+      },
+      error_callback: (err) => {
+        const msg = err.type === 'popup_closed'
+          ? 'החלון נסגר לפני השלמת ההתחברות.'
+          : `שגיאת OAuth: ${err.type}`;
+        reject(new Error(msg));
+      },
+    });
+
+    client.requestAccessToken();
+  });
 }
 
 /**
- * Convert a raw Google Calendar API event into a SmartDay CalendarEvent.
- *
- * TODO (Phase 2): Improve category detection —
- *   - Use colorId to map Google calendar colors to categories
- *   - Check extendedProperties.private['smartday-category'] for manual overrides
- *   - Use a richer keyword list or an AI classifier on the title/description
+ * Revoke the stored token and clear local auth state.
  */
-export function mapGoogleEventToSmartDayEvent(
-  raw: GoogleCalendarEventRaw,
-): CalendarEvent {
+export function disconnectGoogleCalendar(): void {
+  if (!_accessToken) return;
+  window.google?.accounts.oauth2.revoke(_accessToken, () => {});
+  _accessToken = null;
+}
+
+// ---------------------------------------------------------------------------
+// Calendar API
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch upcoming events from the user's primary Google Calendar.
+ * Looks 14 days ahead.
+ *
+ * @throws Hebrew error string when the request fails.
+ */
+export async function fetchGoogleCalendarEvents(): Promise<CalendarEvent[]> {
+  if (!_accessToken) {
+    throw new Error('לא מחובר ל-Google Calendar.');
+  }
+
+  const timeMin = new Date().toISOString();
+  const timeMax = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
+  const url = new URL(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events',
+  );
+  url.searchParams.set('timeMin',       timeMin);
+  url.searchParams.set('timeMax',       timeMax);
+  url.searchParams.set('singleEvents',  'true');
+  url.searchParams.set('orderBy',       'startTime');
+  url.searchParams.set('maxResults',    '50');
+
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: `Bearer ${_accessToken}` },
+  });
+
+  if (res.status === 401) {
+    _accessToken = null;
+    throw new Error('פג תוקף החיבור ל-Google Calendar. נסה להתחבר מחדש.');
+  }
+  if (!res.ok) {
+    throw new Error(`שגיאה בטעינת האירועים (${res.status}).`);
+  }
+
+  const data = await res.json();
+  return (data.items ?? []).map(mapGoogleEventToSmartDayEvent);
+}
+
+// ---------------------------------------------------------------------------
+// Mapping
+// ---------------------------------------------------------------------------
+
+export function mapGoogleEventToSmartDayEvent(raw: GCalEvent): CalendarEvent {
   const startRaw = raw.start.dateTime ?? raw.start.date ?? '';
   const endRaw   = raw.end.dateTime   ?? raw.end.date   ?? '';
 
   const date      = startRaw.split('T')[0];
   const startTime = startRaw.includes('T') ? startRaw.split('T')[1].slice(0, 5) : '00:00';
   const endTime   = endRaw.includes('T')   ? endRaw.split('T')[1].slice(0, 5)   : undefined;
-
-  // TODO (Phase 2): replace with richer detection (see JSDoc above)
-  const category: EventCategory = detectCategory(raw.summary ?? '', raw.colorId);
 
   return {
     id:          raw.id,
@@ -237,31 +218,18 @@ export function mapGoogleEventToSmartDayEvent(
     startTime,
     endTime,
     location:    raw.location,
-    category,
-    importance:  'normal', // TODO (Phase 2): derive from colorId or extendedProperties
+    category:    detectCategory(raw.summary ?? ''),
+    importance:  'normal',
     source:      'googleCalendar',
   };
 }
 
-// ---------------------------------------------------------------------------
-// Helpers (private)
-// ---------------------------------------------------------------------------
-
-/**
- * Keyword-based category detection.
- * Intentionally naive — real version should use colorId mapping first.
- *
- * TODO (Phase 2): Accept a colorId→category map from user preferences.
- */
-function detectCategory(title: string, _colorId?: string): EventCategory {
+function detectCategory(title: string): EventCategory {
   const t = title.toLowerCase();
-  if (/בחינה|מבחן|exam|test/.test(t))            return 'exam';
-  if (/הרצאה|שיעור|lecture|class|קורס/.test(t))  return 'academic';
-  if (/משמרת|עבודה|work|shift/.test(t))           return 'work';
-  if (/פגישה|meeting|סיעור|ועידה/.test(t))        return 'meeting';
-  if (/חג|holiday|יום טוב|festival/.test(t))      return 'holiday';
+  if (/בחינה|מבחן|exam|test/.test(t))             return 'exam';
+  if (/הרצאה|שיעור|lecture|class|קורס/.test(t))   return 'academic';
+  if (/משמרת|עבודה|work|shift/.test(t))            return 'work';
+  if (/פגישה|meeting|ועידה|סיעור/.test(t))         return 'meeting';
+  if (/חג|holiday|יום טוב|festival/.test(t))       return 'holiday';
   return 'personal';
 }
-
-// Exported only for use in the TODO Phase 2 block above — not yet active.
-export { GOOGLE_CLIENT_ID, GOOGLE_API_KEY, GOOGLE_CALENDAR_SCOPE, isGoogleConfigured };

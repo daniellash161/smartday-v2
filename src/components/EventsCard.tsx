@@ -3,6 +3,11 @@ import type { CalendarEvent, EventCategory, EventSource, Task } from '../types';
 import { mockEvents } from '../data/mockData';
 import { isToday, isTomorrow } from '../utils/priority';
 import { isGoogleConfigured } from '../config/google';
+import {
+  connectGoogleCalendar,
+  disconnectGoogleCalendar,
+  fetchGoogleCalendarEvents,
+} from '../services/googleCalendarService';
 
 // ---------------------------------------------------------------------------
 // Group definitions
@@ -310,11 +315,21 @@ interface EventsCardProps {
 }
 
 const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: EventsCardProps) => {
-  const [showGcalMsg, setShowGcalMsg] = useState(false);
-  const isConnected = false; // TODO (Phase 2): drive from googleCalendarService auth state
+  const [gcalEvents,   setGcalEvents]   = useState<CalendarEvent[]>([]);
+  const [isConnected,  setIsConnected]  = useState(false);
+  const [isLoading,    setIsLoading]    = useState(false);
+  const [gcalError,    setGcalError]    = useState<string | null>(null);
   const now = new Date();
 
-  const sorted = [...events].sort(
+  // Merge mock events + Google events; deduplicate by id (Google wins on conflict)
+  const allEvents = useMemo(() => {
+    const map = new Map<string, CalendarEvent>();
+    events.forEach(e => map.set(e.id, e));
+    gcalEvents.forEach(e => map.set(e.id, e));
+    return Array.from(map.values());
+  }, [events, gcalEvents]);
+
+  const sorted = [...allEvents].sort(
     (a, b) =>
       new Date(`${a.date}T${a.startTime}`).getTime() -
       new Date(`${b.date}T${b.startTime}`).getTime(),
@@ -323,6 +338,32 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
   const todayEvents    = sorted.filter(e => isToday(e.date));
   const tomorrowEvents = sorted.filter(e => isTomorrow(e.date));
   const nextEvent      = todayEvents.find(e => new Date(`${e.date}T${e.startTime}`) > now);
+
+  const handleConnect = async () => {
+    if (!isGoogleConfigured) {
+      setGcalError('חיבור Google Calendar עדיין לא הוגדר בסביבת הפיתוח.');
+      return;
+    }
+    setIsLoading(true);
+    setGcalError(null);
+    try {
+      await connectGoogleCalendar();
+      const fetched = await fetchGoogleCalendarEvents();
+      setGcalEvents(fetched);
+      setIsConnected(true);
+    } catch (err) {
+      setGcalError(err instanceof Error ? err.message : 'שגיאה לא ידועה בהתחברות.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDisconnect = () => {
+    disconnectGoogleCalendar();
+    setGcalEvents([]);
+    setIsConnected(false);
+    setGcalError(null);
+  };
 
   return (
     <div className="card">
@@ -344,20 +385,25 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
             {isConnected ? 'מחובר ל־Google Calendar' : 'לא מחובר ל־Google Calendar'}
           </span>
         </div>
-        <button className="events-gcal-btn" onClick={() => setShowGcalMsg(v => !v)}>
-          התחברות ל־Google Calendar
-        </button>
+        {isConnected ? (
+          <button className="events-gcal-btn events-gcal-btn--disconnect" onClick={handleDisconnect}>
+            התנתק
+          </button>
+        ) : (
+          <button
+            className="events-gcal-btn"
+            onClick={handleConnect}
+            disabled={isLoading}
+          >
+            {isLoading ? 'מתחבר...' : 'התחברות ל־Google Calendar'}
+          </button>
+        )}
       </div>
 
-      {showGcalMsg && (
-        <div className="events-gcal-msg">
-          {isGoogleConfigured ? (
-            /* TODO (Phase 2): replace this message with the real OAuth button */
-            <span>בשלב הבא נחבר את SmartDay ל־Google Calendar ונייבא אירועים אמיתיים.</span>
-          ) : (
-            <span>⚠️ חיבור Google Calendar עדיין לא הוגדר בסביבת הפיתוח.</span>
-          )}
-          <button className="events-gcal-msg-close" onClick={() => setShowGcalMsg(false)} aria-label="סגור">✕</button>
+      {gcalError && (
+        <div className="events-gcal-msg events-gcal-msg--error">
+          <span>⚠️ {gcalError}</span>
+          <button className="events-gcal-msg-close" onClick={() => setGcalError(null)} aria-label="סגור">✕</button>
         </div>
       )}
 

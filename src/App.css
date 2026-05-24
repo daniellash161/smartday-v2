@@ -1079,3 +1079,18 @@ body {
   color: var(--green);
   padding: 5px 0;
 }
+
+/* ── GCal disconnect button variant ── */
+.events-gcal-btn--disconnect {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.events-gcal-btn--disconnect:hover { background: var(--surface2); }
+
+/* ── GCal error message variant ── */
+.events-gcal-msg--error {
+  background: #FBF0EF;
+  border-color: #E8C0BC;
+  color: #C0645A;
+}

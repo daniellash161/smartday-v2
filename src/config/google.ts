@@ -14,7 +14,6 @@ export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 export const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 
-/** True only when both required credentials are present at runtime. */
+/** True when the Client ID is present — sufficient for the GSI OAuth token flow. */
 export const isGoogleConfigured =
-  typeof GOOGLE_CLIENT_ID === 'string' && GOOGLE_CLIENT_ID.length > 0 &&
-  typeof GOOGLE_API_KEY   === 'string' && GOOGLE_API_KEY.length   > 0;
+  typeof GOOGLE_CLIENT_ID === 'string' && GOOGLE_CLIENT_ID.length > 0;
