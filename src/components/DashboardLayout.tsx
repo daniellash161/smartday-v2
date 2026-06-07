@@ -28,8 +28,7 @@ const DashboardLayout = () => {
 
   // Calendar state for future events modal
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
-  const [showFutureEvents, setShowFutureEvents] = useState(false);
-  const [categoryOverrides, setCategoryOverrides] = useState<Record<string, EventCategory>>({});
+  const [showFutureEvents, setShowFutureEvents] = useState(false);;
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -48,10 +47,6 @@ const DashboardLayout = () => {
   };
 
   const existingTaskTitles = new Set(tasks.map((t) => t.title));
-
-  const handleCategoryOverride = (id: string, cat: EventCategory) => {
-    setCategoryOverrides(prev => ({ ...prev, [id]: cat }));
-  };
 
   return (
     <div className="dashboard-root" dir="rtl">
@@ -132,8 +127,6 @@ const DashboardLayout = () => {
         <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
           <FutureEventsPanel
             allEvents={calendarEvents}
-            categoryOverrides={categoryOverrides}
-            onCategoryOverride={handleCategoryOverride}
             hasCalendar={calendarEvents.length > 0}
             onClose={() => setShowFutureEvents(false)}
           />

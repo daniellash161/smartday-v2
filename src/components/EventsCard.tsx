@@ -15,6 +15,7 @@ import {
   clearAppleEvents,
 } from '../services/appleCalendarService';
 import { usePersistentState, PREF } from '../utils/userPreferences';
+import SmartTaskSuggestions from './SmartTaskSuggestions';
 
 // ---------------------------------------------------------------------------
 // Group definitions
@@ -581,6 +582,15 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
           tomorrowEvents={tomorrowEvents}
           existingTaskTitles={existingTaskTitles}
           onAddTasks={onAddTasks}
+        />
+      )}
+
+      {/* ── Smart task suggestions (only if source connected) ── */}
+      {isSourceConnected && (
+        <SmartTaskSuggestions
+          calendarEvents={allEvents}
+          existingTaskTitles={existingTaskTitles}
+          onAddTask={task => onAddTasks([task])}
         />
       )}
     </div>

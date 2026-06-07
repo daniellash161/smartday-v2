@@ -1734,6 +1734,393 @@ textarea {
 }
 
 /* =====================================================================
+   FUTURE CALENDAR MODAL (לוח אירועים קדימה)
+   ===================================================================== */
+
+.futureCalendarModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+.futureCalendarModalPanel {
+  width: min(980px, calc(100vw - 64px));
+  max-height: calc(100vh - 64px);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(23, 32, 51, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+}
+
+.futureCalendarModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
+  background: #f4f9ff;
+  border-bottom: 1px solid #eef2f6;
+  flex-shrink: 0;
+}
+
+.futureCalendarModalHeader h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.futureCalendarModalHeader p {
+  margin: 6px 0 0;
+  color: #7c8798;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.futureCalendarModalClose {
+  border: none;
+  background: #ffffff;
+  color: #667085;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.futureCalendarModalClose:hover {
+  background: #f0f7fc;
+  color: #172033;
+  box-shadow: 0 6px 16px rgba(23, 32, 51, 0.12);
+}
+
+.futureCalendarModalToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: #f8f9fc;
+  border-bottom: 1px solid #eef2f6;
+  flex-shrink: 0;
+}
+
+.futureCalendarViewTabs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.futureCalendarTab {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e7edf4;
+  background: #ffffff;
+  color: #7c8798;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.futureCalendarTab:hover {
+  background: #f0f7fc;
+  border-color: #7db7e8;
+  color: #7db7e8;
+}
+
+.futureCalendarTab.futureCalendarTab--active {
+  background: #7db7e8;
+  color: #ffffff;
+  border-color: #7db7e8;
+}
+
+.futureCalendarNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.futureCalendarNavBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #e7edf4;
+  background: #ffffff;
+  color: #7c8798;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.futureCalendarNavBtn:hover {
+  background: #f0f7fc;
+  border-color: #7db7e8;
+  color: #7db7e8;
+}
+
+.futureCalendarNavLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #172033;
+  min-width: 120px;
+  text-align: center;
+}
+
+.futureCalendarModalBody {
+  padding: 24px 28px 28px;
+  overflow-y: auto;
+  background: #ffffff;
+  flex: 1 1 auto;
+}
+
+.futureCalendarEmpty {
+  text-align: center;
+  color: #7c8798;
+  padding: 48px 32px;
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.futureCalendarEventsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.futureCalendarEventRow {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: flex-start;
+  border: 1px solid #e7edf4;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: #ffffff;
+  transition: box-shadow 0.2s ease;
+}
+
+.futureCalendarEventRow:hover {
+  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
+}
+
+.futureCalendarEventDate {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.futureCalendarEventDateValue {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #172033;
+}
+
+.futureCalendarEventTime {
+  font-size: 0.85rem;
+  color: #7c8798;
+  font-weight: 500;
+}
+
+.futureCalendarEventContent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.futureCalendarEventTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #172033;
+  line-height: 1.4;
+}
+
+.futureCalendarEventLocation {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #7c8798;
+}
+
+.futureCalendarEventDescription {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a0aab5;
+  line-height: 1.4;
+}
+
+.futureCalendarEventMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+}
+
+.futureCalendarEventCategory {
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.futureCalendarEventSource {
+  font-size: 0.75rem;
+  color: #7c8798;
+  font-weight: 500;
+}
+
+/* =====================================================================
+   SMART TASK SUGGESTIONS (המלצות משימות)
+   ===================================================================== */
+
+.smart-task-suggestions {
+  border-top: 1px solid var(--border);
+  padding: 16px 20px 18px;
+  background: #fef9f5;
+}
+
+.smart-task-suggestions-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.smart-task-suggestions-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.smart-task-suggestions-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.smart-task-suggestions-sub {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.smart-task-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.smart-task-suggestion-card {
+  background: #ffffff;
+  border: 1px solid #f4e0d5;
+  border-radius: 14px;
+  padding: 12px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.15s;
+}
+
+.smart-task-suggestion-card:hover {
+  box-shadow: 0 4px 12px rgba(200, 100, 50, 0.08);
+}
+
+.smart-task-suggestion-card.smart-task-suggestion-added {
+  background: #f5ebe0;
+  border-color: #dcc4b0;
+  opacity: 0.8;
+}
+
+.smart-task-suggestion-top {
+  display: flex;
+  gap: 8px;
+}
+
+.smart-task-suggestion-icon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.smart-task-suggestion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.smart-task-suggestion-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.smart-task-suggestion-desc {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.smart-task-suggestion-btn {
+  align-self: flex-start;
+  margin-top: 2px;
+  width: auto;
+  padding: 6px 10px;
+  background: #d4937c;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.smart-task-suggestion-btn:hover {
+  opacity: 0.88;
+}
+
+.smart-task-suggestion-done {
+  align-self: flex-start;
+  margin-top: 2px;
+  display: inline-block;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #7ec98f;
+  padding: 5px 0;
+}
+
+/* =====================================================================
    ADVANCED COMPONENTS STYLING
    ===================================================================== */
 
