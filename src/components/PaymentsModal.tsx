@@ -1,5 +1,5 @@
 /**
- * PaymentsModal — Simple clean modal for payment insights
+ * PaymentsModal — Isolated modal with new class names to avoid CSS conflicts
  */
 
 interface PaymentsModalProps {
@@ -9,19 +9,31 @@ interface PaymentsModalProps {
 
 const PaymentsModal = ({ onClose, children }: PaymentsModalProps) => {
   return (
-    <div className="payments-modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="payments-modal-panel">
-        <div className="payments-modal-header">
+    <div
+      className="paymentDetailsModalOverlay"
+      role="dialog"
+      aria-modal="true"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="paymentDetailsModalPanel">
+        <header className="paymentDetailsModalHeader">
           <div>
             <h2>תובנות תשלומים</h2>
             <p>פירוט התובנות שזוהו מתוך קובץ האשראי</p>
           </div>
-          <button type="button" className="payments-modal-close" onClick={onClose}>×</button>
-        </div>
+          <button
+            type="button"
+            className="paymentDetailsModalClose"
+            onClick={onClose}
+            aria-label="סגור"
+          >
+            ×
+          </button>
+        </header>
 
-        <div className="payments-modal-content">
+        <main className="paymentDetailsModalBody">
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

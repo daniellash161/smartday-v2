@@ -2214,21 +2214,21 @@ textarea {
   border-top: 1px solid var(--border);
 }
 
-/* ---- Payments Modal - Simple Clean Structure ---- */
-.payments-modal-overlay {
+/* ---- Payment Details Modal - Isolated with new class names ---- */
+.paymentDetailsModalOverlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   background: rgba(15, 23, 42, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px;
-  direction: rtl;
+  box-sizing: border-box;
 }
 
-.payments-modal-panel {
-  width: min(960px, calc(100vw - 64px));
+.paymentDetailsModalPanel {
+  width: min(1040px, calc(100vw - 64px));
   max-height: calc(100vh - 64px);
   background: #ffffff;
   border-radius: 24px;
@@ -2236,35 +2236,34 @@ textarea {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  direction: rtl;
 }
 
-.payments-modal-header {
+.paymentDetailsModalHeader {
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   padding: 22px 28px;
-  border-bottom: 1px solid #eef2f6;
   background: #fffaf2;
-  flex-shrink: 0;
+  border-bottom: 1px solid #eef2f6;
 }
 
-.payments-modal-header h2 {
+.paymentDetailsModalHeader h2 {
   margin: 0;
   color: #172033;
   font-size: 1.35rem;
   font-weight: 800;
-  letter-spacing: -0.3px;
 }
 
-.payments-modal-header p {
+.paymentDetailsModalHeader p {
   margin: 6px 0 0;
   color: #7c8798;
-  font-size: 0.9rem;
-  font-weight: 500;
+  font-size: 0.95rem;
 }
 
-.payments-modal-close {
+.paymentDetailsModalClose {
   border: none;
   background: #ffffff;
   color: #667085;
@@ -2273,30 +2272,23 @@ textarea {
   border-radius: 999px;
   cursor: pointer;
   font-size: 1.4rem;
-  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
   line-height: 1;
-  padding: 0;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
 }
 
-.payments-modal-close:hover {
+.paymentDetailsModalClose:hover {
   background: #f5f1e8;
   color: #c0645a;
 }
 
-.payments-modal-content {
-  padding: 24px 28px 28px;
+.paymentDetailsModalBody {
+  flex: 1 1 auto;
   overflow-y: auto;
-  flex: 1;
-  min-width: 0;
+  padding: 24px 28px 28px;
+  box-sizing: border-box;
 }
 
-/* Summary section styling */
-.payments-modal-summary {
+.paymentDetailsSummary {
   background: #f8fbfd;
   border: 1px solid #e7edf4;
   border-radius: 18px;
@@ -2304,96 +2296,91 @@ textarea {
   margin-bottom: 20px;
 }
 
-.payments-modal-chips {
+.paymentDetailsChips {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 12px;
 }
 
-.payments-modal-chip {
+.paymentDetailsChip {
   border-radius: 999px;
   padding: 6px 12px;
   background: #dff4ec;
   color: #247f76;
   font-weight: 700;
   font-size: 0.85rem;
-  white-space: nowrap;
 }
 
-/* Section styling */
-.payments-modal-section {
-  margin-top: 18px;
+.paymentDetailsSection {
+  margin-top: 22px;
 }
 
-.payments-modal-section h3 {
+.paymentDetailsSection h3 {
   margin: 0 0 12px;
   color: #172033;
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.payments-insights-grid {
+.paymentDetailsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
 }
 
-/* Payment insight card styling */
-.payment-insight-card {
+.paymentDetailsInsightCard {
   background: #ffffff;
   border: 1px solid #e7edf4;
   border-radius: 18px;
   padding: 16px;
   box-shadow: 0 6px 16px rgba(23, 32, 51, 0.04);
-  transition: all 0.15s ease;
+  min-width: 0;
 }
 
-.payment-insight-card:hover {
-  box-shadow: 0 8px 20px rgba(23, 32, 51, 0.08);
-  border-color: #dff4ec;
-}
-
-.payment-insight-title {
+.paymentDetailsInsightTitle {
   font-weight: 800;
   color: #172033;
   margin-bottom: 6px;
-  font-size: 0.95rem;
 }
 
-.payment-insight-meta {
+.paymentDetailsInsightMeta {
   color: #667085;
   font-size: 0.9rem;
   line-height: 1.5;
-  margin-bottom: 10px;
 }
 
-.payment-insight-badge {
-  display: inline-block;
-  border-radius: 4px;
-  padding: 2px 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-right: 6px;
-  margin-bottom: 6px;
-}
-
-.payment-insight-actions {
+.paymentDetailsActions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   margin-top: 12px;
 }
 
-.payment-insight-actions button {
+.paymentDetailsActions button {
   border: none;
   border-radius: 999px;
   padding: 8px 12px;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
+  background: #dff4ec;
+  color: #247f76;
+}
+
+@media (max-width: 700px) {
+  .paymentDetailsModalOverlay {
+    padding: 16px;
+  }
+
+  .paymentDetailsModalPanel {
+    width: 100%;
+    max-height: calc(100vh - 32px);
+  }
+
+  .paymentDetailsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---- Important Emails Card - Simple Clean Layout ---- */
