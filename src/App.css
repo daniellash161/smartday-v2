@@ -106,8 +106,11 @@ textarea {
   margin: 0;
   padding: 0;
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: isolate;
 }
 .header-wordmark-smart {
   font-size: 1.7rem;
