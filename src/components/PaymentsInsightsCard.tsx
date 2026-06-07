@@ -871,6 +871,13 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
     e.target.value = '';
     if (!picked) return;
 
+    // Validate PDF file type
+    if (!picked.type.includes('pdf') && !picked.name.toLowerCase().endsWith('.pdf')) {
+      setError('ניתן להעלות קובץ PDF בלבד');
+      setFile(null);
+      return;
+    }
+
     fullReset();
     setFile(picked);
     setStep('extracting');
@@ -928,8 +935,12 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       setStep('insights');
 
     } catch (err) {
-      setError(err instanceof Error ? err.message
-        : 'לא הצלחנו לקרוא את הקובץ. ייתכן שהוא מוגן בסיסמה או באיכות סריקה נמוכה.');
+      const errorMsg = err instanceof Error ? err.message : '';
+      if (errorMsg.includes('password') || errorMsg.includes('סיסמה')) {
+        setError('לא הצלחנו לקרוא את ה-PDF. ודאי שהקובץ אינו סרוק כתמונה או מוגן בסיסמה.');
+      } else {
+        setError(errorMsg || 'לא הצלחנו לקרוא את ה-PDF. ודאי שהקובץ אינו סרוק כתמונה או מוגן בסיסמה.');
+      }
       setStep('upload');
       setFile(null);
     }
@@ -1073,19 +1084,45 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
 
       {/* ═══ Upload ═══ */}
       {step === 'upload' && !showingSaved && (
-        <div className="payments-empty">
-          <label className="payments-upload-btn">
-            <input type="file" accept="application/pdf,.pdf"
-              className="payments-file-input" onChange={handleFileChange} />
-            📄 העלאת פירוט אשראי PDF
+        <div className="payments-upload-section">
+          <div className="payments-helper-text">
+            ניתן להעלות פירוט אשראי כדי לזהות הוראות קבע, תשלומים ומנויים חוזרים.
+          </div>
+
+          <label className="payments-upload-zone">
+            <input
+              type="file"
+              accept="application/pdf,.pdf"
+              className="payments-file-input"
+              onChange={handleFileChange}
+            />
+            <div className="payments-upload-content">
+              <span className="payments-upload-icon">📄</span>
+              <span className="payments-upload-text">העלאת פירוט אשראי PDF</span>
+            </div>
           </label>
+
+          {file && !error && (
+            <div className="payments-file-selected">
+              <span className="payments-file-icon">✓</span>
+              <span className="payments-file-name">{file.name}</span>
+            </div>
+          )}
+
           {savedData && (
             <button className="payments-view-saved-btn" onClick={() => setShowingSaved(true)}>
               📂 הצג ניתוח קודם ({fmtDateTime(savedData.analyzedAt)})
             </button>
           )}
-          <p className="payments-privacy-inline">🔒 הניתוח מקומי בלבד — הקובץ אינו נשלח לשרת.</p>
-          {error && <div className="payments-error"><span>⚠️</span><span>{error}</span></div>}
+
+          <p className="payments-privacy-note">🔒 הניתוח מקומי בלבד — הקובץ אינו נשלח לשרת.</p>
+
+          {error && (
+            <div className="payments-error">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
         </div>
       )}
 
