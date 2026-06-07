@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartDay - Product Presentation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --navy: #0F2440;
+      --teal: #3FAFA3;
+      --teal-bright: #1DD1A1;
+      --blue: #7DB7E8;
+      --blue-bright: #54A0FF;
+      --purple: #8B7AC4;
+      --purple-bright: #A55EEA;
+      --pink: #FF6B9D;
+      --rose: #FBE4EA;
+      --coral: #FF6B6B;
+      --orange: #FFA502;
+      --yellow: #FFD93D;
+      --beige: #F4E8D2;
+      --gold: #D8A23A;
+      --mint: #00D2D3;
+      --text-dark: #1F2937;
+      --text-muted: #6B7280;
+      --bg-light: #F5F7FA;
+      --bg-white: #FFFFFF;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      color: var(--text-dark);
+      overflow: hidden;
+    }
+
+    .presentation {
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .slides-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease-out;
+      background: var(--bg-white);
+      padding: 50px 70px;
+      overflow-y: auto;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
+    }
+
+    /* DECORATIVE ANIMATED BACKGROUNDS */
+    .slide::before {
+      content: '';
+      position: fixed;
+      top: -100px;
+      right: -100px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(63, 175, 163, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .slide::after {
+      content: '';
+      position: fixed;
+      bottom: -150px;
+      left: -150px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(125, 183, 232, 0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      animation: float 8s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(30px); }
+    }
+
+    /* SECTION-SPECIFIC STYLES */
+    .slide.problem::before {
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.18) 0%, transparent 70%);
+    }
+
+    .slide.problem {
+      background: linear-gradient(135deg, #fff5f8 0%, #ffe8ef 50%, #ffffff 100%);
+    }
+
+    .slide.research::before {
+      background: radial-gradient(circle, rgba(165, 94, 234, 0.15) 0%, transparent 70%);
+    }
+
+    .slide.research {
+      background: linear-gradient(135deg, #f8f5ff 0%, #ede8ff 50%, #ffffff 100%);
+    }
+
+    .slide.market::before {
+      background: radial-gradient(circle, rgba(84, 160, 255, 0.15) 0%, transparent 70%);
+    }
+
+    .slide.market {
+      background: linear-gradient(135deg, #eff5ff 0%, #e3f0ff 50%, #ffffff 100%);
+    }
+
+    .slide:not(.cover)::before {
+      animation: float-spin 8s linear infinite;
+    }
+
+    @keyframes float-spin {
+      0% { transform: rotate(0deg) translateX(0); }
+      50% { transform: rotate(180deg) translateX(20px); }
+      100% { transform: rotate(360deg) translateX(0); }
+    }
+
+    /* SLIDE HEADER */
+    .slide-header {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 40px;
+      padding-bottom: 25px;
+      border-bottom: 4px solid;
+      border-image: linear-gradient(90deg, var(--teal-bright), var(--blue-bright), var(--purple-bright)) 1;
+    }
+
+    .slide-header h1 {
+      font-size: 52px;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--navy) 0%, var(--teal-bright) 50%, var(--blue-bright) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+      letter-spacing: -0.8px;
+    }
+
+    .slide-header p {
+      font-size: 16px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* CONTENT AREA */
+    .slide-content {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* CARDS - MORE VIBRANT */
+    .card {
+      background: var(--bg-white);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--teal-bright), var(--blue-bright));
+    }
+
+    .card:hover {
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.08);
+      transform: translateY(-6px);
+    }
+
+    .card.card-teal {
+      background: linear-gradient(135deg, #f0fdf9 0%, #e0fef6 100%);
+    }
+
+    .card.card-teal::before {
+      background: linear-gradient(90deg, var(--teal-bright), var(--mint));
+    }
+
+    .card.card-blue {
+      background: linear-gradient(135deg, #eff5ff 0%, #dce9ff 100%);
+    }
+
+    .card.card-blue::before {
+      background: linear-gradient(90deg, var(--blue-bright), var(--purple-bright));
+    }
+
+    .card.card-rose {
+      background: linear-gradient(135deg, #fff5f8 0%, #ffe8ef 100%);
+    }
+
+    .card.card-rose::before {
+      background: linear-gradient(90deg, var(--pink), var(--coral));
+    }
+
+    .card.card-purple {
+      background: linear-gradient(135deg, #f5f0ff 0%, #ede8ff 100%);
+    }
+
+    .card.card-purple::before {
+      background: linear-gradient(90deg, var(--purple-bright), var(--pink));
+    }
+
+    .card.card-gold {
+      background: linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%);
+    }
+
+    .card.card-gold::before {
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+    }
+
+    .card.card-orange {
+      background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+    }
+
+    .card.card-orange::before {
+      background: linear-gradient(90deg, var(--orange), var(--coral));
+    }
+
+    .card h3 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 14px;
+      margin-top: 8px;
+    }
+
+    .card p, .card li {
+      font-size: 15px;
+      color: var(--text-dark);
+      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .card li {
+      margin-bottom: 12px;
+      padding-left: 28px;
+      position: relative;
+    }
+
+    .card li:before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--teal-bright);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    /* GRID LAYOUTS */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    /* COVER SLIDE */
+    .slide.cover {
+      background: linear-gradient(135deg, var(--navy) 0%, #1a3a5c 30%, var(--teal-bright) 70%, var(--blue-bright) 100%);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.cover::before {
+      background: radial-gradient(circle at 80% 20%, rgba(255, 107, 157, 0.2) 0%, transparent 50%);
+      animation: none;
+    }
+
+    .slide.cover::after {
+      background: radial-gradient(circle at 20% 80%, rgba(29, 209, 161, 0.15) 0%, transparent 50%);
+      animation: none;
+    }
+
+    .cover-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+    }
+
+    .cover-content h1 {
+      font-size: 80px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      letter-spacing: -1.5px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .cover-content p {
+      font-size: 20px;
+      margin-bottom: 15px;
+      opacity: 0.95;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .cover-content .meta {
+      font-size: 14px;
+      opacity: 0.75;
+      margin-top: 30px;
+      font-weight: 600;
+    }
+
+    /* DECORATIVE ELEMENTS ON COVER */
+    .cover::before {
+      width: 600px;
+      height: 600px;
+      top: -200px;
+      right: -200px;
+    }
+
+    .cover::after {
+      width: 500px;
+      height: 500px;
+      bottom: -150px;
+      left: -150px;
+    }
+
+    /* BADGES & TAGS */
+    .badge {
+      display: inline-block;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, var(--teal-bright), var(--mint));
+      color: white;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 6px;
+      box-shadow: 0 4px 15px rgba(29, 209, 161, 0.25);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: default;
+    }
+
+    .badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(29, 209, 161, 0.35);
+    }
+
+    .badge.blue {
+      background: linear-gradient(135deg, var(--blue-bright), var(--purple-bright));
+      box-shadow: 0 4px 15px rgba(84, 160, 255, 0.25);
+    }
+
+    .badge.rose {
+      background: linear-gradient(135deg, var(--pink), var(--coral));
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 107, 157, 0.25);
+    }
+
+    .badge.gold {
+      background: linear-gradient(135deg, var(--gold), var(--orange));
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 165, 2, 0.25);
+    }
+
+    .badge.purple {
+      background: linear-gradient(135deg, var(--purple-bright), var(--pink));
+      box-shadow: 0 4px 15px rgba(165, 94, 234, 0.25);
+    }
+
+    /* PERSONAS */
+    .persona-card {
+      background: var(--bg-white);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .persona-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--teal-bright), var(--blue-bright));
+    }
+
+    .persona-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .persona-avatar {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, var(--teal-bright), var(--blue-bright));
+      border-radius: 50%;
+      margin: 8px auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      box-shadow: 0 6px 20px rgba(29, 209, 161, 0.3);
+    }
+
+    .persona-card h4 {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .persona-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* SWOT */
+    .swot-box {
+      background: var(--bg-white);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .swot-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+    }
+
+    .swot-box:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .swot-box.strength {
+      background: linear-gradient(135deg, #f0fdf9 0%, #e0fef6 100%);
+    }
+
+    .swot-box.strength::before {
+      background: linear-gradient(90deg, var(--teal-bright), var(--mint));
+    }
+
+    .swot-box.weakness {
+      background: linear-gradient(135deg, #fff5f8 0%, #ffe8ef 100%);
+    }
+
+    .swot-box.weakness::before {
+      background: linear-gradient(90deg, var(--pink), var(--coral));
+    }
+
+    .swot-box.opportunity {
+      background: linear-gradient(135deg, #eff5ff 0%, #dce9ff 100%);
+    }
+
+    .swot-box.opportunity::before {
+      background: linear-gradient(90deg, var(--blue-bright), var(--purple-bright));
+    }
+
+    .swot-box.threat {
+      background: linear-gradient(135deg, #fffbf0 0%, #fff5e6 100%);
+    }
+
+    .swot-box.threat::before {
+      background: linear-gradient(90deg, var(--gold), var(--orange));
+    }
+
+    .swot-box h4 {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 12px;
+      margin-top: 8px;
+    }
+
+    .swot-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* HIGHLIGHT BOX */
+    .highlight {
+      background: linear-gradient(135deg, var(--teal-bright) 0%, var(--mint) 100%);
+      color: white;
+      padding: 28px;
+      border-radius: 16px;
+      margin-top: 30px;
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(29, 209, 161, 0.3);
+      transition: all 0.4s ease;
+    }
+
+    .highlight:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(29, 209, 161, 0.35);
+    }
+
+    .highlight.blue {
+      background: linear-gradient(135deg, var(--blue-bright) 0%, var(--purple-bright) 100%);
+      box-shadow: 0 12px 30px rgba(84, 160, 255, 0.3);
+    }
+
+    .highlight.rose {
+      background: linear-gradient(135deg, var(--pink) 0%, var(--coral) 100%);
+      box-shadow: 0 12px 30px rgba(255, 107, 157, 0.3);
+    }
+
+    .highlight.gold {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%);
+      box-shadow: 0 12px 30px rgba(255, 165, 2, 0.3);
+    }
+
+    /* TABLE */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table th {
+      background: linear-gradient(135deg, var(--teal-bright) 0%, var(--blue-bright) 100%);
+      color: white;
+      padding: 16px;
+      text-align: right;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table tr:hover {
+      background: linear-gradient(135deg, rgba(29, 209, 161, 0.05), rgba(84, 160, 255, 0.05));
+    }
+
+    /* NAVIGATION */
+    .nav-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 15px;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 14px 24px;
+      border-radius: 35px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    button {
+      background: linear-gradient(135deg, var(--teal-bright), var(--mint));
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 15px rgba(29, 209, 161, 0.25);
+    }
+
+    button:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--teal-bright), var(--blue-bright));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(29, 209, 161, 0.35);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .slide-counter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 0 18px;
+      border-left: 2px solid #e5e7eb;
+      border-right: 2px solid #e5e7eb;
+    }
+
+    /* SCROLLBAR */
+    .slide::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .slide::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .slide::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--teal-bright), var(--blue-bright));
+      border-radius: 10px;
+    }
+
+    .slide::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, var(--teal-bright), var(--purple-bright));
+    }
+
+    /* FEATURE LIST */
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .feature-list li {
+      padding: 14px 0 14px 32px;
+      border-bottom: 1px solid #f0f0f0;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .feature-list li:before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--teal-bright);
+      font-weight: 900;
+      font-size: 18px;
+    }
+
+    .feature-list li:hover {
+      padding-left: 40px;
+      color: var(--teal-bright);
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* TIMELINE */
+    .timeline {
+      position: relative;
+      padding: 20px 0;
+      margin-top: 20px;
+    }
+
+    .timeline-item {
+      padding: 16px;
+      padding-left: 56px;
+      position: relative;
+      background: linear-gradient(135deg, rgba(29, 209, 161, 0.08), rgba(84, 160, 255, 0.08));
+      border-radius: 12px;
+      margin-bottom: 14px;
+      border-left: 4px solid var(--teal-bright);
+      transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover {
+      transform: translateX(8px);
+      background: linear-gradient(135deg, rgba(29, 209, 161, 0.15), rgba(84, 160, 255, 0.15));
+    }
+
+    .timeline-number {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--teal-bright), var(--blue-bright));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 13px;
+      box-shadow: 0 4px 15px rgba(29, 209, 161, 0.3);
+    }
+
+    .timeline-item h5 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+
+    .timeline-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* COMPARISON TABLE */
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .comparison-item {
+      background: linear-gradient(135deg, rgba(29, 209, 161, 0.08), rgba(84, 160, 255, 0.08));
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .comparison-item:hover {
+      border-color: var(--teal-bright);
+      background: linear-gradient(135deg, rgba(29, 209, 161, 0.15), rgba(84, 160, 255, 0.15));
+      transform: translateY(-4px);
+    }
+
+    .comparison-item h5 {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .comparison-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="presentation">
+    <div class="slides-container">
+      <!-- SLIDE 1: COVER -->
+      <div class="slide cover active">
+        <div class="cover-content">
+          <h1>SmartDay</h1>
+          <p>דשבורד יומי חכם שמרכז מידע, מסנן רעש ומתרגם את היום לפעולות ברורות</p>
+          <div class="meta">פרויקט מוצר • תכנון, בדיקה ושיפור פרוטוטייפ</div>
+        </div>
+      </div>
+
+      <!-- SLIDE 2: PROBLEM -->
+      <div class="slide problem">
+        <div class="slide-header">
+          <h1>הבעיה: ניהול יום בין יותר מדי מקורות</h1>
+          <p>מידע יומי מפוזר בין יומן, משימות, מיילים, תשלומים ועדכונים - ללא תיעדוף ברור</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-rose">
+            <h3>💡 החיסרון המרכזי</h3>
+            <p>המשתמש עובר בין מערכות שונות, מזהה לבד מה חשוב, ומתרגם מידע לפעולה באופן ידני</p>
+          </div>
+          <div class="highlight rose">
+            🔥 עומס מידע ללא סדר פעולה
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 3: TARGET AUDIENCE -->
+      <div class="slide research">
+        <div class="slide-header">
+          <h1>קהל היעד והצרכים המרכזיים</h1>
+          <p>התמקדנו במשתמשים עמוסים שמנהלים כמה מקורות מידע במקביל</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-teal">
+              <h3>👥 קהל יעד</h3>
+              <ul>
+                <li>סטודנטים שעובדים במקביל</li>
+                <li>משתמשים עם דדליינים</li>
+                <li>אנשים שמנהלים יומן אישי</li>
+              </ul>
+            </div>
+            <div class="card card-blue">
+              <h3>⚡ צרכים מרכזיים</h3>
+              <ul>
+                <li>להבין מה דחוף היום</li>
+                <li>לרכז מידע במקום אחד</li>
+                <li>להפוך מיילים למשימות</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 4: ASSUMPTIONS -->
+      <div class="slide research">
+        <div class="slide-header">
+          <h1>ההשערות הראשוניות</h1>
+          <p>הבחינות שהנחו אותנו בתחילת התהליך</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-purple">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--purple-bright); font-weight: 900; font-size: 18px;">💡</span><strong>ריכוז מידע יפחית עומס</strong> - אם המידע יופיע במקום אחד, המשתמש יבין מהר יותר</li>
+              <li style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--purple-bright); font-weight: 900; font-size: 18px;">🎯</span><strong>משתמשים רוצים פעולה</strong> - הערך המרכזי הוא הפיכת מיילים לפעולות</li>
+              <li style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--purple-bright); font-weight: 900; font-size: 18px;">📅</span><strong>סטודנטים צריכים תכנון קדימה</strong> - היום ומחר לא מספיקים</li>
+              <li style="padding: 12px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--purple-bright); font-weight: 900; font-size: 18px;">🏦</span><strong>תובנות פיננסיות צריכות להיות שמרניות</strong> - אמינות ושקיפות חשובות</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 5: PERSONAS -->
+      <div class="slide research">
+        <div class="slide-header">
+          <h1>פרסונות מרכזיות</h1>
+          <p>שני משתמשים מרכזיים המתמודדים עם אתגר דומה</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="persona-card">
+              <div class="persona-avatar" style="background: linear-gradient(135deg, var(--teal-bright), var(--mint));">👩‍🎓</div>
+              <h4>סטודנטית עובדת, 24</h4>
+              <p style="margin-bottom: 8px;"><strong style="color: var(--teal-bright);">צרכים:</strong> לראות שיעורים ומשימות</p>
+              <p><strong style="color: var(--pink);">Pain:</strong> מידע מפוזר בין יומן ומיילים</p>
+            </div>
+            <div class="persona-card">
+              <div class="persona-avatar" style="background: linear-gradient(135deg, var(--blue-bright), var(--purple-bright));">👩‍💼</div>
+              <h4>אמא, עובדת, 32</h4>
+              <p style="margin-bottom: 8px;"><strong style="color: var(--blue-bright);">צרכים:</strong> תמונת מצב בבוקר</p>
+              <p><strong style="color: var(--pink);">Pain:</strong> עומס תפקידים</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 6: PAIN POINTS -->
+      <div class="slide problem">
+        <div class="slide-header">
+          <h1>נקודות כאב מרכזיות</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-rose">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--coral); font-weight: 900; font-size: 18px;">📊</span><strong>עומס מידע</strong> - מידע יומי מגיע מיומן, מיילים, משימות, אשראי וחדשות</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--coral); font-weight: 900; font-size: 18px;">❓</span><strong>קושי בתיעדוף</strong> - המשתמש לא יודע מה דורש טיפול עכשיו</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--coral); font-weight: 900; font-size: 18px;">🔄</span><strong>מעבר בין אפליקציות</strong> - כל מקור מידע בכלי אחר</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--coral); font-weight: 900; font-size: 18px;">📧</span><strong>מיילים בין הכיסאות</strong> - מייל חשוב לא הופך למשימה</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--coral); font-weight: 900; font-size: 18px;">💾</span><strong>חוסר רציפות</strong> - העדפות לא תמיד נשמרות</li>
+            </ul>
+          </div>
+          <div class="highlight rose">
+            🎯 הכאב המרכזי: המידע קיים, אך לא מחובר לפעולה
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 7: JOBS TO BE DONE -->
+      <div class="slide research">
+        <div class="slide-header">
+          <h1>Jobs To Be Done</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-teal">
+              <h3>📍 JTBD 1: פתח יום</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--teal-bright);">משימה:</strong> להבין מה דורש טיפול</li>
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--teal-bright);">הצלחה:</strong> זיהוי מה דחוף</li>
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--teal-bright);">SmartDay:</strong> דשבורד במקום אחד</li>
+              </ul>
+            </div>
+            <div class="card card-blue">
+              <h3>📍 JTBD 2: הפוך לפעולה</h3>
+              <ul style="list-style: none; padding: 0;">
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--blue-bright);">משימה:</strong> מידע → פעולה</li>
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--blue-bright);">הצלחה:</strong> הוספה מהירה</li>
+                <li style="padding: 8px 0; margin-bottom: 0; padding-left: 0;"><strong style="color: var(--blue-bright);">SmartDay:</strong> כפתורי פעולה</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 8: USER STORIES -->
+      <div class="slide research">
+        <div class="slide-header">
+          <h1>User Stories</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-blue">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 12px 0; padding-left: 0; margin-bottom: 0; border-bottom: 1px solid #f0f0f0;"><strong style="color: var(--blue-bright);">בתור</strong> סטודנטית עובדת <strong style="color: var(--blue-bright);">כאשר</strong> אני פותחת את היום בבוקר <strong style="color: var(--blue-bright);">אני רוצה</strong> לראות שיעורים ומשימות במקום אחד</li>
+              <li style="padding: 12px 0; padding-left: 0; margin-bottom: 0; border-bottom: 1px solid #f0f0f0;"><strong style="color: var(--blue-bright);">בתור</strong> משתמשת עם הרבה מיילים <strong style="color: var(--blue-bright);">כאשר</strong> מייל דורש פעולה <strong style="color: var(--blue-bright);">אני רוצה</strong> להפוך אותו למשימה</li>
+              <li style="padding: 12px 0; padding-left: 0;"><strong style="color: var(--blue-bright);">בתור</strong> סטודנטית <strong style="color: var(--blue-bright);">כאשר</strong> יש אירועים עתידיים <strong style="color: var(--blue-bright);">אני רוצה</strong> לראות אותם בלוח קדימה</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 9: EXISTING SOLUTIONS -->
+      <div class="slide market">
+        <div class="slide-header">
+          <h1>פתרונות קיימים</h1>
+          <p>כל כלי פותר חלק אחד בלבד</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-blue">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">📅</span><strong>Calendar</strong> - טוב: ניהול אירועים | חסר: משימות, מיילים, תשלומים</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">✓</span><strong>Task Apps</strong> - טוב: משימות | חסר: חיבור אוטומטי למיילים</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">📧</span><strong>Gmail</strong> - טוב: תקשורת | חסר: הפיכה למשימות</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">💳</span><strong>Banking</strong> - טוב: פירוט חיובים | חסר: תובנות יומיות בדשבורד</li>
+            </ul>
+          </div>
+          <div class="highlight blue">
+            ⚡ הפער: אין חיבור בין המידע לפעולה
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 10: MARKET TRENDS -->
+      <div class="slide market">
+        <div class="slide-header">
+          <h1>מגמות שוק וטכנולוגיה</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-blue">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">📱</span><strong>דשבורדים אישיים</strong> - משתמשים רוצים ריכוז במקום אחד</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">🤖</span><strong>AI לתיעדוף</strong> - כלים עוברים מהצגת מידע להמלצה על פעולה</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">⚙️</span><strong>אוטומציה</strong> - מיילים, אירועים ועדכונים הופכים לפעולות</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900; font-size: 16px;">🔐</span><strong>פרטיות ושקיפות</strong> - משתמשים רוצים לדעת מאיפה מגיע כל מידע</li>
+            </ul>
+          </div>
+          <div class="highlight blue">
+            🎯 המגמות תומכות בSmartDay: ריכוז, סינון, פעולה
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 11: SWOT -->
+      <div class="slide market">
+        <div class="slide-header">
+          <h1>ניתוח SWOT</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-4">
+            <div class="swot-box strength">
+              <h4>💪 Strengths</h4>
+              <p>ריכוז מידע • הפיכה לפעולות • עבור עובדים</p>
+            </div>
+            <div class="swot-box weakness">
+              <h4>⚠️ Weaknesses</h4>
+              <p>תלות API • ניתוח PDF • סיווג חד</p>
+            </div>
+            <div class="swot-box opportunity">
+              <h4>🚀 Opportunities</h4>
+              <p>שילוב AI • הרחבה • התאמה</p>
+            </div>
+            <div class="swot-box threat">
+              <h4>🎯 Threats</h4>
+              <p>Google • פרטיות • API limits</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 12: VISION -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>הפתרון: דשבורד יומי חכם</h1>
+          <p>SmartDay מרכז מידע ממקורות שונים ומציג רק את מה שדורש תשומת לב</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <h3>🎯 הגרעין של SmartDay</h3>
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 0; border-bottom: 1px solid #f0f0f0;"><strong>יומן + משימות + מיילים + תשלומים + עדכונים = SmartDay</strong></li>
+              <li style="padding: 10px 0; padding-left: 0;"><strong>SmartDay לא מחליף את הכלים הקיימים</strong> - הוא מחבר ביניהם</li>
+            </ul>
+          </div>
+          <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px;">
+            <span class="badge">יומן</span>
+            <span class="badge">משימות</span>
+            <span class="badge">מיילים</span>
+            <span class="badge blue">תשלומים</span>
+            <span class="badge blue">עדכונים</span>
+            <span class="badge gold">העדפות</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 13: VALUE PROPOSITION -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>הצעת הערך הייחודית</h1>
+          <p>ממידע מפוזר לפעולות ברורות</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-teal">
+              <h3>🎯 תמונת מצב יומית</h3>
+              <p>כל מה שחשוב ליום אחד, במקום אחד</p>
+            </div>
+            <div class="card card-teal">
+              <h3>🌬️ סינון רעש</h3>
+              <p>הצגת מידע רלוונטי בלבד, לא רשימות</p>
+            </div>
+            <div class="card card-blue">
+              <h3>⚡ פעולה מיידית</h3>
+              <p>מייל, חיוב או עדכון → משימה</p>
+            </div>
+            <div class="card card-blue">
+              <h3>👤 חוויה אישית</h3>
+              <p>שמירת העדפות, מצב לילה, תאימות</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 14: COMPETITORS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>מתחרים ישירים</h1>
+          <p>השוואת יכולות</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-blue">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900;">📅</span><strong>Calendar</strong> - Low ריכוז, High אירועים</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900;">✓</span><strong>Task Apps</strong> - Medium ריכוז, High משימות</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900;">📧</span><strong>Gmail</strong> - Low ריכוז, Low משימות</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--blue-bright); font-weight: 900;">💳</span><strong>Banking</strong> - Low ריכוז, Medium תובנות</li>
+              <li style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #f0f0f0; padding-left: 0;"><strong style="color: var(--teal-bright);">SmartDay</strong> - HIGH ריכוז, HIGH משימות, HIGH תובנות תשלומים</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 15: BUSINESS MODEL CANVAS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>Business Model Canvas - שלבים 1-4</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-gold">
+              <h3>🎯 Customer Segments</h3>
+              <ul>
+                <li>סטודנטים עובדים</li>
+                <li>משתמשים עמוסים</li>
+                <li>מנהלי פרויקטים</li>
+              </ul>
+            </div>
+            <div class="card card-gold">
+              <h3>💎 Value Proposition</h3>
+              <ul>
+                <li>דשבורד מרכזי</li>
+                <li>תיעדוף מידע</li>
+                <li>פעולה ברורה</li>
+              </ul>
+            </div>
+            <div class="card card-orange">
+              <h3>📱 Channels</h3>
+              <ul>
+                <li>אפליקציית Web</li>
+                <li>קהילות סטודנטים</li>
+                <li>מוסדות</li>
+              </ul>
+            </div>
+            <div class="card card-orange">
+              <h3>🤝 Customer Relationships</h3>
+              <ul>
+                <li>חוויה אישית</li>
+                <li>תזכורות חכמות</li>
+                <li>שמירת העדפות</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 16: PROTOTYPE GOAL -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>מטרת הפרוטוטייפ</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">🧠</span><strong>בדיקת הבנה</strong> - המשתמש מבין מה דחוף היום?</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">🔄</span><strong>בדיקת הפיכה</strong> - מידע הופך למשימות?</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">✨</span><strong>בדיקת ערך</strong> - חיבור מקורות יוצר ערך?</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">📊</span><strong>בדיקת שימושיות</strong> - תובנות משפרות חוויה?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 17: FEATURES -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>אפיון פיצ׳רים מרכזיים</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <h3>⭐ Critical Priority</h3>
+            <ul>
+              <li>לוח זמנים חכם, מיני לוח שנה, מיילים חשובים</li>
+              <li>תשלומים עם ניתוח PDF, תזכורות תשלום</li>
+              <li>שמירת העדפות (מצב לילה, מקור יומן)</li>
+            </ul>
+          </div>
+          <div class="card card-blue" style="margin-top: 16px;">
+            <h3>✓ Nice-to-Have</h3>
+            <ul>
+              <li>עדכוני בוקר, פינה אישית</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 18: PRIORITIZATION -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>תעדוף פיצ׳רים לפי סדר עבודה</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-number">1</div>
+              <h5>שיפור מודול אשראי</h5>
+              <p>הפיצ׳ר היה לא אמין</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">2</div>
+              <h5>הפרדת סוגי תשלומים</h5>
+              <p>למניעת בלבול</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">3</div>
+              <h5>תזכורות תשלום</h5>
+              <p>הופך מידע לפעולה</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">4</div>
+              <h5>שמירת העדפות</h5>
+              <p>מאפשר שימוש רציף</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">5</div>
+              <h5>מיני לוח שנה</h5>
+              <p>תכנון עתידי</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 19: PROTOTYPE OVERVIEW -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>הפרוטוטייפ הפונקציונלי</h1>
+          <p>גרסה עובדת שניתן להתנסות בה</p>
+        </div>
+        <div class="slide-content">
+          <div style="background: linear-gradient(135deg, rgba(29, 209, 161, 0.1), rgba(84, 160, 255, 0.1)); border-radius: 16px; padding: 70px 40px; text-align: center; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 3px dashed var(--teal-bright);">
+            <p style="font-size: 18px; color: var(--text-muted); font-weight: 600;">צילום מסך של הדשבורד הראשי</p>
+          </div>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <span class="badge">⚡ React + TypeScript</span>
+            <span class="badge blue">📊 דשבורד יומי</span>
+            <span class="badge purple">🔗 חיבורי מידע</span>
+            <span class="badge gold">💾 שמירה מקומית</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 20: DEMO FLOW -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>הדגמה חיה</h1>
+          <p>זרימות שמראות מידע שהופך לפעולה</p>
+        </div>
+        <div class="slide-content">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-number">1</div>
+              <h5>פתיחת הדשבורד וסיכום יומי</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">2</div>
+              <h5>צפייה בלוח זמנים ומיני לוח שנה</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">3</div>
+              <h5>הוספת משימה</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">4</div>
+              <h5>הצגת מייל חשוב והפיכתו למשימה</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">5</div>
+              <h5>פתיחת תובנות תשלומים</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 21: EVOLUTION -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>התפתחות הפרוטוטייפ</h1>
+          <p>מ-wireframes לגרסה משופרת</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-rose">
+              <h3>📋 Wireframes</h3>
+              <ul>
+                <li>מבנה בסיסי</li>
+                <li>חלוקה לאזורים</li>
+              </ul>
+            </div>
+            <div class="card card-teal">
+              <h3>🚀 גרסה משופרת</h3>
+              <ul>
+                <li>תובנות חכמות</li>
+                <li>לוח שנה קדימה</li>
+                <li>עדכונים בחלון צף</li>
+                <li>פינה אישית</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 22: TESTING ROUNDS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>שני סבבי בדיקות</h1>
+          <p>בדיקה, שיפור, בדיקה חוזרת</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-gold">
+              <h3>🔍 סבב ראשון</h3>
+              <ul>
+                <li>בדיקת הדשבורד</li>
+                <li>זיהוי בעיות עומס</li>
+                <li>בדיקת PDF אשראי</li>
+              </ul>
+            </div>
+            <div class="card card-blue">
+              <h3>🎯 סבב שני</h3>
+              <ul>
+                <li>בדיקה לאחר שיפורים</li>
+                <li>תובנות תשלומים</li>
+                <li>מיני לוח שנה</li>
+                <li>העדפות</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 23: METHODOLOGY -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>משתתפים, מתודולוגיה, מדדים</h1>
+          <p></p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <h3>👥 משתתפים</h3>
+            <p>6 משתמשים - סטודנטים, עובדים, אמהות</p>
+          </div>
+          <div class="card card-blue" style="margin-top: 16px;">
+            <h3>🔬 מתודולוגיה</h3>
+            <p>בדיקות שמישות, משימות, חשיבה בקול רם</p>
+          </div>
+          <div class="card card-purple" style="margin-top: 16px;">
+            <h3>📊 מדדים</h3>
+            <ul>
+              <li>מספר פעולות 'הוסף למשימות'</li>
+              <li>תזכורות שנוספו ליומן</li>
+              <li>מציאת אירוע עתידי</li>
+              <li>אמון בתובנות פיננסיות</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 24: METRICS ANALYSIS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>ניתוח מדדים</h1>
+          <p>תוצאות ותובנות</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">📊</span><strong>הפיכת מידע:</strong> משתמשים הבינו את הערך של פעולה</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">🔍</span><strong>אירוע עתידי:</strong> שיפור משמעותי אחרי הוספת לוח שנה</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">💳</span><strong>אמון אשראי:</strong> שורת מקור הגביר את האמון</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">💾</span><strong>שמירה:</strong> העדפות נשמרות וזמינות לאחר רענון</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 25: QUALITATIVE FINDINGS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>ממצאים כמותיים ואיכותיים</h1>
+          <p>שני מדדי הצלחה</p>
+        </div>
+        <div class="slide-content">
+          <div class="grid-2">
+            <div class="card card-blue">
+              <h3>📊 Quantitative</h3>
+              <ul>
+                <li>פעולות 'הוסף'</li>
+                <li>שיפור בלוח שנה</li>
+                <li>שמירה אמינה</li>
+              </ul>
+            </div>
+            <div class="card card-purple">
+              <h3>💬 Qualitative</h3>
+              <ul>
+                <li>דשבורד ברור יותר</li>
+                <li>אשראי שמרני</li>
+                <li>עדכונים מאוזנים</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 26: RECOMMENDATIONS -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>מסקנות והמלצות</h1>
+          <p>שיפורים לשלב הבא</p>
+        </div>
+        <div class="slide-content">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-number">1</div>
+              <h5>חזק את עיקרון מידע → פעולה</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">2</div>
+              <h5>דשבורד קומפקטי עם פירוט בחלונות צפים</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">3</div>
+              <h5>הרחב תמיכה בספקים אשראי נוספים</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">4</div>
+              <h5>שפר דיוק תזכורות תשלום</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">5</div>
+              <h5>חבר חדשות דרך Backend יציב</h5>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-number">6</div>
+              <h5>העמיק התאמה אישית ושמירת העדפות</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SLIDE 27: SUMMARY -->
+      <div class="slide">
+        <div class="slide-header">
+          <h1>סיכום</h1>
+          <p>SmartDay: מרכז שליטה יומי חכם</p>
+        </div>
+        <div class="slide-content">
+          <div class="card card-teal">
+            <ul style="list-style: none; padding: 0;">
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">✓</span>משתמשים צריכים פחות עומס ויותר תיעדוף</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">✓</span>דשבורד טוב לא מציג הכול - הוא מציג את מה שחשוב</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative; border-bottom: 1px solid #f0f0f0;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">✓</span>פיצ׳רים חכמים חייבים להיות אמינים ושקופים</li>
+              <li style="padding: 10px 0; padding-left: 28px; position: relative;"><span style="position: absolute; left: 0; color: var(--teal-bright); font-weight: 900; font-size: 16px;">✓</span>התאמה אישית ושמירת העדפות = שימוש חוזר</li>
+            </ul>
+          </div>
+          <div class="highlight">
+            ✨ תמונת מצב אחת • פעולות ברורות • פחות רעש
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION -->
+    <div class="nav-controls">
+      <button id="prev-btn" onclick="previousSlide()">← הקודם</button>
+      <div class="slide-counter">
+        <span id="current-slide">1</span> / <span id="total-slides">27</span>
+      </div>
+      <button id="next-btn" onclick="nextSlide()">הבא →</button>
+    </div>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+
+    document.getElementById('total-slides').textContent = totalSlides;
+
+    function showSlide(n) {
+      slides.forEach(slide => slide.classList.remove('active'));
+      if (n >= totalSlides) currentSlide = 0;
+      if (n < 0) currentSlide = totalSlides - 1;
+
+      slides[currentSlide].classList.add('active');
+      document.getElementById('current-slide').textContent = currentSlide + 1;
+
+      document.getElementById('prev-btn').disabled = false;
+      document.getElementById('next-btn').disabled = false;
+      if (currentSlide === 0) document.getElementById('prev-btn').disabled = true;
+      if (currentSlide === totalSlides - 1) document.getElementById('next-btn').disabled = true;
+    }
+
+    function nextSlide() {
+      currentSlide++;
+      showSlide(currentSlide);
+    }
+
+    function previousSlide() {
+      currentSlide--;
+      showSlide(currentSlide);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') nextSlide();
+      if (e.key === 'ArrowLeft') previousSlide();
+    });
+
+    showSlide(currentSlide);
+  </script>
+</body>
+</html>
