@@ -2429,13 +2429,220 @@ textarea {
   opacity: 0.6;
 }
 
+/* ---- Collapsed sections (accordion) ---- */
+.pi-collapsed {
+  margin-top: 24px;
+}
+
+.pi-collapsed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #172033;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: right;
+  direction: rtl;
+}
+
+.pi-collapsed-toggle:hover {
+  background: #f8fbfd;
+  border-color: #dff4ec;
+}
+
+.pi-collapsed-chevron {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  color: #8892a0;
+  transition: transform 0.2s ease;
+}
+
+.pi-collapsed-body {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pi-collapsed-group {
+  margin-top: 28px;
+}
+
+.pi-section--collapsed-sub {
+  margin-top: 24px;
+}
+
+/* ---- Debug subsections ---- */
+.pi-debug-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pi-debug-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #172033;
+  margin: 0;
+}
+
+/* ---- Quality stats in collapsed section ---- */
+.payments-quality-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.payments-quality-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #8892a0;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.payments-quality-conf--high {
+  color: #247f76;
+  border-color: #dff4ec;
+  background: #f0faf8;
+}
+
+.payments-quality-conf--medium {
+  color: #b8860b;
+  border-color: #f0ead0;
+  background: #fef9e8;
+}
+
+/* ---- All transactions list ---- */
+.payments-all-tx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.payments-all-tx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #8892a0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.payments-all-tx-date {
+  min-width: 60px;
+  font-weight: 600;
+  color: #4f8fc6;
+}
+
+.payments-all-tx-merchant {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.payments-all-tx-amount {
+  font-weight: 700;
+  color: #3fafa3;
+  white-space: nowrap;
+}
+
+/* ---- Raw text box ---- */
+.payments-raw-box {
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+  color: #5a6b7a;
+  margin: 0;
+}
+
+/* ---- Actions (bottom buttons) ---- */
+.pi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 20px;
+  margin-top: 24px;
+  border-top: 1px solid #e7edf4;
+}
+
+.payments-reanalyze-btn,
+.payments-edit-data-btn,
+.payments-clear-saved-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #247f76;
+  border: 1px solid #ddf3f0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  width: fit-content;
+}
+
+.payments-reanalyze-btn:hover,
+.payments-edit-data-btn:hover {
+  background: #dff4ec;
+  border-color: #c0e8e0;
+  color: #1f6f66;
+}
+
+.payments-clear-saved-btn {
+  color: #8892a0;
+  background: transparent;
+  border: 1px solid #e7edf4;
+  padding: 8px 12px;
+}
+
+.payments-clear-saved-btn:hover {
+  background: #f8fbfd;
+  color: #c0392b;
+  border-color: #fce8ed;
+}
+
+/* ---- Privacy disclaimer ---- */
 .pi-disclaimer {
-  font-size: 11px;
-  color: var(--text-light);
+  font-size: 0.84rem;
+  color: #8892a0;
   font-style: italic;
   margin: 0;
-  padding-top: 8px;
-  border-top: 1px solid var(--border);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e7edf4;
+  line-height: 1.5;
 }
 
 /* ---- Payment Details Modal - Polished Aesthetic ---- */
@@ -2784,6 +2991,154 @@ textarea {
   color: #8892a0;
   font-size: 0.95rem;
   padding: 24px 0;
+}
+
+/* ---- Modal collapsed sections ---- */
+.paymentDetailsModalBody .pi-collapsed {
+  margin-top: 28px;
+}
+
+.paymentDetailsModalBody .pi-collapsed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #172033;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: right;
+  direction: rtl;
+}
+
+.paymentDetailsModalBody .pi-collapsed-toggle:hover {
+  background: #f8fbfd;
+  border-color: #dff4ec;
+}
+
+.paymentDetailsModalBody .pi-collapsed-body {
+  margin-top: 12px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paymentDetailsModalBody .pi-section--collapsed-sub {
+  margin-top: 24px;
+}
+
+.paymentDetailsModalBody .pi-debug-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.paymentDetailsModalBody .pi-debug-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #172033;
+  margin: 0;
+}
+
+.paymentDetailsModalBody .payments-quality-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: #8892a0;
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 999px;
+  padding: 6px 12px;
+}
+
+.paymentDetailsModalBody .payments-all-tx-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #8892a0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #f8fbfd;
+}
+
+.paymentDetailsModalBody .payments-all-tx-date {
+  min-width: 60px;
+  font-weight: 600;
+  color: #4f8fc6;
+}
+
+.paymentDetailsModalBody .payments-raw-box {
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+  color: #5a6b7a;
+  margin: 0;
+}
+
+.paymentDetailsModalBody .pi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 20px;
+  margin-top: 28px;
+  border-top: 1px solid #e7edf4;
+}
+
+.paymentDetailsModalBody .payments-reanalyze-btn,
+.paymentDetailsModalBody .payments-edit-data-btn,
+.paymentDetailsModalBody .payments-clear-saved-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: #247f76;
+  border: 1px solid #ddf3f0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  width: fit-content;
+}
+
+.paymentDetailsModalBody .payments-reanalyze-btn:hover,
+.paymentDetailsModalBody .payments-edit-data-btn:hover {
+  background: #dff4ec;
+  border-color: #c0e8e0;
+  color: #1f6f66;
+}
+
+.paymentDetailsModalBody .payments-clear-saved-btn {
+  color: #8892a0;
+  background: transparent;
+  border: 1px solid #e7edf4;
+}
+
+.paymentDetailsModalBody .payments-clear-saved-btn:hover {
+  background: #f8fbfd;
+  color: #c0392b;
+  border-color: #fce8ed;
 }
 
 @media (max-width: 700px) {
