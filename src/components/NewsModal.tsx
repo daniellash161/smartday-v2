@@ -29,8 +29,8 @@ function fmtRelative(iso: string): string {
 
 const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
   return (
-    <div className="news-modal-overlay">
-      <div className="news-modal-panel">
+    <div className="news-modal-overlay" onClick={onClose}>
+      <div className="news-modal-panel" onClick={(e) => e.stopPropagation()}>
         <header className="news-modal-header">
           <div>
             <h2>📰 עדכוני בוקר</h2>
@@ -39,7 +39,9 @@ const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
           <button
             className="news-modal-close"
             onClick={onClose}
+            type="button"
             aria-label="סגור"
+            title="סגור"
           >
             ×
           </button>
@@ -47,21 +49,21 @@ const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
 
         <div className="news-modal-body">
           {items.length === 0 ? (
-            <div className="news-empty-state">אין עדכונים זמינים.</div>
+            <div className="news-modal-empty">אין עדכונים חשובים כרגע.</div>
           ) : (
             <div className="news-modal-items">
               {items.map((item) => (
                 <div key={item.id} className="news-modal-item">
                   <h3 className="news-modal-item-title">{item.title}</h3>
                   <div className="news-modal-item-meta">
-                    <span>{item.source}</span>
+                    <span className="news-modal-item-source">{item.source}</span>
                     {item.importance === 'high' && (
                       <span className="news-importance-badge">חשוב להיום</span>
                     )}
                     {demoMode && item.isDemo && (
                       <span className="news-demo-badge">נתוני דוגמה</span>
                     )}
-                    <span>{fmtRelative(item.publishedAt)}</span>
+                    <span className="news-modal-item-time">{fmtRelative(item.publishedAt)}</span>
                   </div>
                   {item.summary && (
                     <p className="news-modal-item-summary">{item.summary}</p>
