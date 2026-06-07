@@ -850,6 +850,14 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
     if (saved) setSavedData(saved);
   }, []);
 
+  // Auto-display saved insights in modal view (compact=false)
+  useEffect(() => {
+    if (!compact && savedData && !analysis && step === 'upload') {
+      setShowingSaved(true);
+      setStep('insights');
+    }
+  }, [compact, savedData, analysis, step]);
+
   useEffect(() => () => {
     if (slowTimer.current) clearTimeout(slowTimer.current);
   }, []);
