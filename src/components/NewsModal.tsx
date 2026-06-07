@@ -70,6 +70,20 @@ const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
                       {item.summary}
                     </p>
                   )}
+                  <div style={{ marginTop: '12px' }}>
+                    {item.url && item.url !== '#' ? (
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="morningNewsReadMore"
+                      >
+                        פתח כתבה
+                      </a>
+                    ) : (
+                      <span style={{ fontSize: '0.85rem', color: '#a0aab5' }}>אין קישור זמין</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

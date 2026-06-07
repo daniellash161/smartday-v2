@@ -2077,6 +2077,31 @@ textarea {
   font-size: 0.98rem;
 }
 
+.morningNewsReadMore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: #7db7e8;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.morningNewsReadMore:hover {
+  background: #5fa7dd;
+  box-shadow: 0 4px 12px rgba(125, 183, 232, 0.3);
+}
+
+.morningNewsReadMore:active {
+  transform: scale(0.98);
+}
+
 /* ---- Payments Card ---- */
 .payments-card,
 .payments-insights-card {

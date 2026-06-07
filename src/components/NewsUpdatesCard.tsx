@@ -114,6 +114,7 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
     }
     setIsRefreshing(true);
     setRefreshError(null);
+    setStatus('loading');
     fetchMorningNews()
       .then(data => {
         if (data.length > 0) {
@@ -121,13 +122,16 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
           onItemsLoaded?.(data);
           setLastUpdated(new Date().toISOString());
           setStatus('success');
+          setRefreshError(null);
         } else {
           setRefreshError('לא זוהו עדכונים חדשים כרגע.');
+          setStatus('error');
         }
         setIsRefreshing(false);
       })
       .catch(() => {
         setRefreshError('לא הצלחנו לרענן כרגע. המידע הקודם עדיין זמין.');
+        setStatus('error');
         setIsRefreshing(false);
       });
   };
@@ -152,13 +156,19 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
         <div className="news-empty-state">⏳ טוענים עדכוני בוקר...</div>
       )}
 
-      {status === 'error' && items.length === 0 && (
+      {status === 'error' && items.length === 0 && !refreshError && (
         <div className="news-error-state">
           <p>לא הצלחנו למשוך עדכונים כרגע.</p>
         </div>
       )}
 
-      {items.length === 0 && status !== 'loading' && status !== 'error' && (
+      {refreshError && (
+        <div className="news-error-state">
+          <p>{refreshError}</p>
+        </div>
+      )}
+
+      {items.length === 0 && status !== 'loading' && status !== 'error' && !refreshError && (
         <div className="news-empty-state">אין עדכונים חשובים כרגע.</div>
       )}
 
@@ -193,7 +203,7 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
           type="button"
           title="רענן חדשות"
         >
-          {isRefreshing ? '⟳' : 'רענן'}
+          {isRefreshing ? 'מרענן...' : 'רענן'}
         </button>
         {status === 'error' && (
           <button
