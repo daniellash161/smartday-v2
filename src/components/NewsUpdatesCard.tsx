@@ -111,12 +111,13 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
           onItemsLoaded?.(data);
           setLastUpdated(new Date().toISOString());
           setStatus('success');
+          setLoadError(null);
         } else {
           setLoadError('לא זוהו עדכונים חדשים כרגע.');
         }
       })
       .catch(() => {
-        setLoadError('לא הצלחנו לרענן כרגע. המידע הקודם עדיין זמין.');
+        setLoadError('הרענון נכשל, מוצגים העדכונים האחרונים שנשמרו.');
       })
       .finally(() => {
         setIsRefreshing(false);
@@ -138,8 +139,8 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
         </div>
       </div>
 
-      {/* Loading state — only on initial load with no items yet */}
-      {status === 'loading' && items.length === 0 && (
+      {/* Loading state — on initial load OR during refresh (if no items yet) */}
+      {(status === 'loading' || isRefreshing) && items.length === 0 && (
         <div className="news-empty-state">⏳ טוענים עדכוני בוקר...</div>
       )}
 
@@ -158,7 +159,7 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
       )}
 
       {/* No items state */}
-      {items.length === 0 && status !== 'loading' && status !== 'error' && !loadError && (
+      {items.length === 0 && status !== 'loading' && status !== 'error' && !isRefreshing && !loadError && (
         <div className="news-empty-state">אין עדכונים חשובים כרגע.</div>
       )}
 
