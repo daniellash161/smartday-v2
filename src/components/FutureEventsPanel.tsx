@@ -1,12 +1,11 @@
 /**
- * FutureEventsPanel — Future events modal
+ * FutureEventsPanel — Mini calendar modal showing future events
  * ─────────────────────────────────────────────────────────────────────────────
- * Clean modal showing upcoming events in week/month view.
- * Week shows next 7 days, month shows current month.
+ * Shows upcoming events in month or week grid view with day selection and detail panel.
  */
 
 import { useState, useMemo } from 'react';
-import type { CalendarEvent } from '../types';
+import type { CalendarEvent, EventCategory } from '../types';
 import { getUserPreference, setUserPreference, PREF } from '../utils/userPreferences';
 
 const HE_MONTHS = [
@@ -14,6 +13,7 @@ const HE_MONTHS = [
   'יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר',
 ];
 
+const HE_DAY_SHORT = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
 const HE_DAY_FULL = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -38,30 +38,52 @@ const FutureEventsPanel = ({ allEvents, hasCalendar, onClose }: FutureEventsPane
   today.setHours(0, 0, 0, 0);
 
   const [view, setView] = useState<ViewMode>(
-    () => getUserPreference(PREF.MINI_CAL_VIEW, 'month') as ViewMode
+    () => (getUserPreference(PREF.MINI_CAL_VIEW, 'month') as ViewMode) || 'month'
   );
   const [monthYear, setMonthYear] = useState({ year: today.getFullYear(), month: today.getMonth() });
+  const [selectedDay, setSelectedDay] = useState<string | null>(
+    today.toISOString().split('T')[0]
+  );
 
-  // Filter out demo events and sort by date
-  const futureEvents = useMemo(() => {
+  // Filter real events (no demo) and sort by date
+  const realEvents = useMemo(() => {
     return allEvents
       .filter(e => e.source !== 'demo')
       .sort((a, b) => {
-        const dateA = new Date(`${a.date}T${a.startTime}`);
-        const dateB = new Date(`${b.date}T${b.startTime}`);
+        const dateA = new Date(`${a.date}T${a.startTime || '00:00'}`);
+        const dateB = new Date(`${b.date}T${b.startTime || '00:00'}`);
         return dateA.getTime() - dateB.getTime();
       });
   }, [allEvents]);
 
-  // Group events by date for display
+  // Group events by date
   const eventsByDate = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    for (const event of futureEvents) {
+    for (const event of realEvents) {
       if (!map.has(event.date)) map.set(event.date, []);
       map.get(event.date)!.push(event);
     }
     return map;
-  }, [futureEvents]);
+  }, [realEvents]);
+
+  // Month grid generation
+  const monthDays = useMemo(() => {
+    const firstDay = new Date(monthYear.year, monthYear.month, 1).getDay();
+    const daysInMonth = new Date(monthYear.year, monthYear.month + 1, 0).getDate();
+    const days: (number | null)[] = Array(firstDay).fill(null);
+    for (let i = 1; i <= daysInMonth; i++) days.push(i);
+    while (days.length % 7) days.push(null);
+    return days;
+  }, [monthYear]);
+
+  // Week generation
+  const weekStart = new Date(today);
+  weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(d.getDate() + i);
+    return d.toISOString().split('T')[0];
+  });
 
   const handleViewChange = (newView: ViewMode) => {
     setView(newView);
@@ -80,9 +102,24 @@ const FutureEventsPanel = ({ allEvents, hasCalendar, onClose }: FutureEventsPane
     );
   };
 
-  const rangeLabel = view === 'month'
-    ? `${HE_MONTHS[monthYear.month]} ${monthYear.year}`
-    : 'השבוע הקרוב';
+  const getDateString = (year: number, month: number, day: number) => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  };
+
+  const getDayEventsForMonth = (day: number): CalendarEvent[] => {
+    const dateStr = getDateString(monthYear.year, monthYear.month, day);
+    return eventsByDate.get(dateStr) || [];
+  };
+
+  const getDayEventsForWeek = (dateStr: string): CalendarEvent[] => {
+    return eventsByDate.get(dateStr) || [];
+  };
+
+  const isToday = (dateStr: string) => dateStr === today.toISOString().split('T')[0];
+  const isSelected = (dateStr: string) => dateStr === selectedDay;
+
+  const selectedDayEvents = selectedDay ? getDayEventsForWeek(selectedDay) : [];
+  const selectedDayObj = selectedDay ? new Date(selectedDay) : null;
 
   return (
     <div className="futureCalendarModalOverlay" role="dialog" aria-modal="true" dir="rtl" onClick={(e) => {
@@ -126,57 +163,139 @@ const FutureEventsPanel = ({ allEvents, hasCalendar, onClose }: FutureEventsPane
 
           <div className="futureCalendarNav">
             <button className="futureCalendarNavBtn" onClick={prevMonth} type="button">›</button>
-            <span className="futureCalendarNavLabel">{rangeLabel}</span>
+            <span className="futureCalendarNavLabel">
+              {view === 'month'
+                ? `${HE_MONTHS[monthYear.month]} ${monthYear.year}`
+                : `שבוע ${weekStart.toLocaleDateString('he-IL', { month: 'short', day: 'numeric' })}`}
+            </span>
             <button className="futureCalendarNavBtn" onClick={nextMonth} type="button">‹</button>
           </div>
         </div>
 
         {/* Body */}
         <main className="futureCalendarModalBody">
-          {!hasCalendar || futureEvents.length === 0 ? (
+          {!hasCalendar || realEvents.length === 0 ? (
             <div className="futureCalendarEmpty">
               <p>אין אירועים עתידיים להצגה.</p>
             </div>
+          ) : view === 'month' ? (
+            <div className="futureCalendarContent">
+              {/* Month Grid */}
+              <div className="futureCalendarGrid">
+                {/* Day headers */}
+                {HE_DAY_SHORT.map((d, i) => (
+                  <div key={`dow-${i}`} className="futureCalendarDowHeader">{d}</div>
+                ))}
+
+                {/* Day cells */}
+                {monthDays.map((day, idx) => {
+                  if (!day) return <div key={`empty-${idx}`} className="futureCalendarDayCell futureCalendarDayCell--empty" />;
+
+                  const dateStr = getDateString(monthYear.year, monthYear.month, day);
+                  const dayEvents = getDayEventsForMonth(day);
+                  const isCurrentDay = isToday(dateStr);
+                  const isCurrentSelected = isSelected(dateStr);
+
+                  return (
+                    <div
+                      key={`day-${day}`}
+                      className={`futureCalendarDayCell${isCurrentDay ? ' futureCalendarDayCell--today' : ''}${isCurrentSelected ? ' futureCalendarDayCell--selected' : ''}`}
+                      onClick={() => setSelectedDay(dateStr)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="futureCalendarDayNumber">{day}</div>
+                      <div className="futureCalendarDayEvents">
+                        {dayEvents.slice(0, 2).map(event => (
+                          <div
+                            key={event.id}
+                            className="futureCalendarEventChip"
+                            style={{ backgroundColor: CATEGORY_COLOR[event.category] || '#ccc' }}
+                            title={event.title}
+                          >
+                            {event.title.slice(0, 12)}
+                          </div>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <div className="futureCalendarMoreChip">+{dayEvents.length - 2}</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           ) : (
-            <div className="futureCalendarEventsList">
-              {futureEvents.map((event) => {
-                const eventDate = new Date(`${event.date}T${event.startTime}`);
-                const dateStr = eventDate.toLocaleDateString('he-IL', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                });
-                const color = CATEGORY_COLOR[event.category] || '#7c8798';
+            <div className="futureCalendarContent">
+              {/* Week Grid */}
+              <div className="futureCalendarWeekGrid">
+                {weekDays.map(dateStr => {
+                  const d = new Date(dateStr);
+                  const dow = HE_DAY_FULL[d.getDay()];
+                  const dayNum = d.getDate();
+                  const dayEvents = getDayEventsForWeek(dateStr);
+                  const isCurrentDay = isToday(dateStr);
+                  const isCurrentSelected = isSelected(dateStr);
 
-                return (
-                  <div key={event.id} className="futureCalendarEventRow">
-                    <div className="futureCalendarEventDate">
-                      <span className="futureCalendarEventDateValue">{dateStr}</span>
-                      <span className="futureCalendarEventTime">{event.startTime}</span>
+                  return (
+                    <div
+                      key={dateStr}
+                      className={`futureCalendarWeekDay${isCurrentDay ? ' futureCalendarWeekDay--today' : ''}${isCurrentSelected ? ' futureCalendarWeekDay--selected' : ''}`}
+                      onClick={() => setSelectedDay(dateStr)}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="futureCalendarWeekDayHeader">
+                        <div className="futureCalendarWeekDayName">{dow}</div>
+                        <div className="futureCalendarWeekDayNumber">{dayNum}</div>
+                      </div>
+                      <div className="futureCalendarWeekDayEvents">
+                        {dayEvents.length === 0 ? (
+                          <div className="futureCalendarWeekDayEmpty">אין</div>
+                        ) : (
+                          dayEvents.map(event => (
+                            <div
+                              key={event.id}
+                              className="futureCalendarWeekEventChip"
+                              style={{ borderLeftColor: CATEGORY_COLOR[event.category] || '#ccc' }}
+                              title={event.title}
+                            >
+                              <div className="futureCalendarWeekEventTitle">{event.title.slice(0, 20)}</div>
+                              {event.startTime && <div className="futureCalendarWeekEventTime">{event.startTime}</div>}
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-                    <div className="futureCalendarEventContent">
-                      <h3 className="futureCalendarEventTitle">{event.title}</h3>
-                      {event.location && (
-                        <p className="futureCalendarEventLocation">📍 {event.location}</p>
-                      )}
-                      {event.description && (
-                        <p className="futureCalendarEventDescription">{event.description}</p>
-                      )}
+          {/* Selected Day Panel */}
+          {selectedDay && selectedDayObj && (
+            <div className="futureCalendarSelectedDayPanel">
+              <h3>
+                {HE_DAY_FULL[selectedDayObj.getDay()]} {selectedDayObj.toLocaleDateString('he-IL', { day: '2-digit', month: '2-digit' })}
+              </h3>
+              {selectedDayEvents.length === 0 ? (
+                <p>אין אירועים ביום זה.</p>
+              ) : (
+                <div className="futureCalendarSelectedDayEvents">
+                  {selectedDayEvents.map(event => (
+                    <div key={event.id} className="futureCalendarSelectedDayEvent">
+                      <div className="futureCalendarSelectedDayEventTitle">{event.title}</div>
+                      {event.startTime && <div className="futureCalendarSelectedDayEventTime">🕐 {event.startTime}</div>}
+                      {event.location && <div className="futureCalendarSelectedDayEventLocation">📍 {event.location}</div>}
+                      <div className="futureCalendarSelectedDayEventMeta">
+                        <span className="futureCalendarSelectedDayEventCategory">{event.category}</span>
+                        <span className="futureCalendarSelectedDayEventSource">{event.source}</span>
+                      </div>
                     </div>
-
-                    <div className="futureCalendarEventMeta">
-                      <span
-                        className="futureCalendarEventCategory"
-                        style={{ backgroundColor: color }}
-                      >
-                        {event.category}
-                      </span>
-                      <span className="futureCalendarEventSource">{event.source}</span>
-                    </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </main>

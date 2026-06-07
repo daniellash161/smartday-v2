@@ -5551,3 +5551,246 @@ select:focus {
   line-height: 1.6;
   font-size: 0.92rem;
 }
+
+/* =====================================================================
+   FUTURE CALENDAR GRID STYLES (לוח אירועים קדימה)
+   ===================================================================== */
+
+.futureCalendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.futureCalendarDowHeader {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #7c8798;
+  padding: 8px 4px;
+}
+
+.futureCalendarDayCell {
+  aspect-ratio: 1;
+  border: 1px solid #e7edf4;
+  border-radius: 12px;
+  padding: 6px 4px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.futureCalendarDayCell:hover {
+  border-color: #7db7e8;
+  box-shadow: 0 4px 12px rgba(125, 183, 232, 0.1);
+}
+
+.futureCalendarDayCell--today {
+  background: #f0f7fc;
+  border-color: #7db7e8;
+  font-weight: 600;
+}
+
+.futureCalendarDayCell--selected {
+  border-color: #3fafa3;
+  background: #e8f9f6;
+}
+
+.futureCalendarDayCell--empty {
+  background: transparent;
+  border: none;
+  cursor: default;
+}
+
+.futureCalendarDayNumber {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #172033;
+  line-height: 1.2;
+}
+
+.futureCalendarDayEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  flex: 1;
+  overflow: hidden;
+  font-size: 0.65rem;
+}
+
+.futureCalendarEventChip {
+  padding: 2px 4px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.futureCalendarMoreChip {
+  font-size: 0.7rem;
+  color: #7c8798;
+  font-weight: 600;
+  padding: 2px 0;
+}
+
+.futureCalendarWeekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.futureCalendarWeekDay {
+  border: 1px solid #e7edf4;
+  border-radius: 14px;
+  padding: 12px 10px;
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  min-height: 150px;
+}
+
+.futureCalendarWeekDay:hover {
+  border-color: #7db7e8;
+  box-shadow: 0 4px 12px rgba(125, 183, 232, 0.1);
+}
+
+.futureCalendarWeekDay--today {
+  background: #f0f7fc;
+  border-color: #7db7e8;
+}
+
+.futureCalendarWeekDay--selected {
+  border-color: #3fafa3;
+  background: #e8f9f6;
+}
+
+.futureCalendarWeekDayHeader {
+  text-align: center;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #eef2f6;
+  padding-bottom: 6px;
+}
+
+.futureCalendarWeekDayName {
+  font-size: 0.85rem;
+  color: #7c8798;
+  font-weight: 600;
+}
+
+.futureCalendarWeekDayNumber {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #172033;
+}
+
+.futureCalendarWeekDayEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.futureCalendarWeekDayEmpty {
+  text-align: center;
+  color: #a0aab5;
+  font-size: 0.85rem;
+  margin-top: 16px;
+}
+
+.futureCalendarWeekEventChip {
+  padding: 6px 8px;
+  border-left: 3px solid #ccc;
+  border-radius: 6px;
+  background: #fafbfc;
+  overflow: hidden;
+}
+
+.futureCalendarWeekEventTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #172033;
+  line-height: 1.3;
+}
+
+.futureCalendarWeekEventTime {
+  font-size: 0.75rem;
+  color: #7c8798;
+  margin-top: 2px;
+}
+
+.futureCalendarSelectedDayPanel {
+  border-top: 1px solid #eef2f6;
+  padding: 16px;
+  background: #fafbfc;
+  border-radius: 12px;
+}
+
+.futureCalendarSelectedDayPanel h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #172033;
+}
+
+.futureCalendarSelectedDayEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.futureCalendarSelectedDayEvent {
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 10px;
+}
+
+.futureCalendarSelectedDayEventTitle {
+  font-weight: 700;
+  color: #172033;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.futureCalendarSelectedDayEventTime {
+  font-size: 0.85rem;
+  color: #7c8798;
+  margin-bottom: 2px;
+}
+
+.futureCalendarSelectedDayEventLocation {
+  font-size: 0.85rem;
+  color: #7c8798;
+  margin-bottom: 4px;
+}
+
+.futureCalendarSelectedDayEventMeta {
+  display: flex;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.futureCalendarSelectedDayEventCategory {
+  background: #f0f7fc;
+  color: #7db7e8;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.futureCalendarSelectedDayEventSource {
+  color: #a0aab5;
+  font-weight: 500;
+}
+
