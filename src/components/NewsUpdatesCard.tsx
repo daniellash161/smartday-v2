@@ -94,8 +94,8 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
     loadNews();
   }, [demoMode, onItemsLoaded]);
 
-  // Refresh existing news (only updates items, doesn't change main status)
-  const refreshNews = () => {
+  // Refresh existing news — same function as initial load
+  const refreshNews = async () => {
     if (demoMode) {
       setLastUpdated(new Date().toISOString());
       return;
@@ -104,24 +104,23 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
     setIsRefreshing(true);
     setLoadError(null);
 
-    fetchMorningNews()
-      .then(data => {
-        if (data.length > 0) {
-          setItems(data);
-          onItemsLoaded?.(data);
-          setLastUpdated(new Date().toISOString());
-          setStatus('success');
-          setLoadError(null);
-        } else {
-          setLoadError('לא זוהו עדכונים חדשים כרגע.');
-        }
-      })
-      .catch(() => {
-        setLoadError('הרענון נכשל, מוצגים העדכונים האחרונים שנשמרו.');
-      })
-      .finally(() => {
-        setIsRefreshing(false);
-      });
+    try {
+      const data = await fetchMorningNews();
+      if (data.length > 0) {
+        setItems(data);
+        onItemsLoaded?.(data);
+        setLastUpdated(new Date().toISOString());
+        setStatus('success');
+        setLoadError(null);
+      } else {
+        setLoadError('לא זוהו עדכונים חדשים כרגע.');
+      }
+    } catch (error) {
+      console.error('News refresh error:', error);
+      setLoadError('הרענון נכשל, מוצגים העדכונים האחרונים שנשמרו.');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   const mainItem = items.find(i => i.importance === 'high') ?? items[0];
