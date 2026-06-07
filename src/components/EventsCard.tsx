@@ -42,10 +42,16 @@ const sourceLabelMap: Record<EventSource, string> = {
   demo:           'דמו',
   manual:         'ידני',
   googleCalendar: 'Google',
+  appleCalendar:  'Apple',
+  gmail:          'Gmail',
 };
 
 const sourceExtraClass: Record<EventSource, string> = {
-  demo: '', manual: 'source-manual', googleCalendar: 'source-gcal',
+  demo: '',
+  manual: 'source-manual',
+  googleCalendar: 'source-gcal',
+  appleCalendar: 'source-apple',
+  gmail: 'source-gmail',
 };
 
 // ---------------------------------------------------------------------------

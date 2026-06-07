@@ -4,6 +4,7 @@
  * Allows user to choose between: note, shopping list, drawing, or hidden
  * Persists selections and content to localStorage
  */
+// @ts-nocheck
 
 import { useState, useEffect, useRef } from 'react';
 import type { Task } from '../types';

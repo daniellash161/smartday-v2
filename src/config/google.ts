@@ -13,6 +13,7 @@
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 export const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+export const GMAIL_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 
 /** True when the Client ID is present — sufficient for the GSI OAuth token flow. */
 export const isGoogleConfigured =

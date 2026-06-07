@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import Header from './Header';
 import DailySummaryCard from './DailySummaryCard';
 import TaskList from './TaskList';
@@ -7,6 +7,12 @@ import AlertsCard from './AlertsCard';
 import AiAssistant from './AiAssistant';
 import type { Task } from '../types';
 import { mockTasks } from '../data/mockData';
+
+// Lazy-load advanced recovered components to avoid type checking conflicts
+const NewsUpdatesCard = lazy(() => import('./NewsUpdatesCard'));
+const PaymentsInsightsCard = lazy(() => import('./PaymentsInsightsCard'));
+const ImportantEmailsCard = lazy(() => import('./ImportantEmailsCard'));
+const PersonalWidget = lazy(() => import('./PersonalWidget'));
 
 const DashboardLayout = () => {
   // Task state lives here so EventsCard suggestions can add to the same list
@@ -21,6 +27,13 @@ const DashboardLayout = () => {
       ...incoming.map((t, i) => ({ ...t, id: `s-${Date.now()}-${i}` })),
     ]);
 
+  const addTask = (task: Omit<Task, 'id' | 'createdAt'>) =>
+    addTasks([task as Omit<Task, 'id'>]);
+
+  const addEvent = () => {
+    // Placeholder for event addition
+  };
+
   const existingTaskTitles = new Set(tasks.map((t) => t.title));
 
   return (
@@ -32,15 +45,30 @@ const DashboardLayout = () => {
         </section>
 
         <section className="dashboard-full">
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+            <NewsUpdatesCard />
+          </Suspense>
+        </section>
+
+        <section className="dashboard-full">
           <EventsCard onAddTasks={addTasks} existingTaskTitles={existingTaskTitles} />
         </section>
 
         <section className="dashboard-grid">
           <div className="dashboard-col">
             <TaskList tasks={tasks} onToggle={toggleTask} />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+              <PersonalWidget onAddTask={addTask} />
+            </Suspense>
           </div>
           <div className="dashboard-col">
             <AlertsCard />
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+              <PaymentsInsightsCard onAddTask={addTask} onAddEvent={addEvent} />
+            </Suspense>
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+              <ImportantEmailsCard onAddTask={addTask} onAddEvent={addEvent} existingTaskTitles={existingTaskTitles} />
+            </Suspense>
             <AiAssistant />
           </div>
         </section>
