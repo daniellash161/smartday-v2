@@ -20,6 +20,9 @@ import {
   gmailIsConnected,
 } from '../services/gmailService';
 
+// For demo: use local state if real Gmail connection fails
+let demoMode = false;
+
 // ---------------------------------------------------------------------------
 // Display maps
 // ---------------------------------------------------------------------------
@@ -385,24 +388,23 @@ interface Props {
 }
 
 const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Props) => {
-  // ── Auth + fetch state ────────────────────────────────────────────────────
-  const [isConnected,   setIsConnected]   = useState(() => restoreGmailSession());
+  // ── Real Gmail OAuth state ──────────────────────────────────────────────────
+  const [isConnected,   setIsConnected]   = useState(() => {
+    try {
+      restoreGmailSession();
+      return gmailIsConnected();
+    } catch {
+      return false;
+    }
+  });
   const [isLoading,     setIsLoading]     = useState(false);
   const [gmailError,    setGmailError]    = useState<string | null>(null);
-  const [fetchedEmails, setFetchedEmails] = useState<ImportantEmail[]>([]);
 
-  // ── Persistence state (email id → status) ────────────────────────────────
+  // ── Email display state ─────────────────────────────────────────────────────
+  const [fetchedEmails, setFetchedEmails] = useState<ImportantEmail[]>([]);
   const [statuses,      setStatuses]      = useState<Record<string, EmailStatus>>(loadStatuses);
   const [taskAddedIds,  setTaskAddedIds]  = useState<Set<string>>(new Set());
   const [eventAddedIds, setEventAddedIds] = useState<Set<string>>(new Set());
-
-  // ── On mount: if session was restored, immediately fetch emails ───────────
-  useEffect(() => {
-    if (gmailIsConnected()) {
-      _doFetch();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // ── Derived: merge fetched emails with local status overrides ─────────────
   const allEmails = useMemo<ImportantEmail[]>(
@@ -416,17 +418,38 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
     [allEmails],
   );
 
-  // ── Fetch helper ──────────────────────────────────────────────────────────
-  async function _doFetch(): Promise<void> {
+  // ── On mount: restore Gmail session if available ───────────────────────────
+  useEffect(() => {
+    if (gmailIsConnected()) {
+      _doFetch();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Real Gmail OAuth handlers ───────────────────────────────────────────────
+  const _doFetch = async () => {
     setIsLoading(true);
     setGmailError(null);
     try {
       const emails = await fetchImportantEmails();
+      console.log(`Gmail: Fetched ${emails.length} important emails`);
       setFetchedEmails(emails);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'שגיאה בטעינת המיילים.';
+      console.error('Gmail fetch error:', err);
+      let msg = 'שגיאה בטעינת המיילים.';
+      if (err instanceof Error) {
+        msg = err.message;
+        // Check for common API errors
+        if (msg.includes('401') || msg.includes('Unauthorized')) {
+          msg = 'חיבור Gmail הצליח, אבל חסרה הרשאת קריאת מיילים. יש להתחבר מחדש.';
+        } else if (msg.includes('403') || msg.includes('Forbidden')) {
+          msg = 'אין הרשאה לקרוא מיילים. יש להתחבר מחדש עם הרשאות כוללות.';
+        } else if (msg.includes('Gmail API')) {
+          msg = 'Gmail API עדיין לא מופעל. בדקי את הגדרות Google Cloud.';
+        }
+      }
       setGmailError(msg);
-      // If the token expired during fetch, the service cleared it — reflect that
+      // If token expired, reflect disconnection
       if (!gmailIsConnected()) {
         setIsConnected(false);
         setFetchedEmails([]);
@@ -434,9 +457,8 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
-  // ── Connect ───────────────────────────────────────────────────────────────
   const handleConnect = async () => {
     setIsLoading(true);
     setGmailError(null);
@@ -445,19 +467,20 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
       setIsConnected(true);
       await _doFetch();
     } catch (err) {
-      setGmailError(err instanceof Error ? err.message : 'שגיאת התחברות.');
+      setGmailError(err instanceof Error ? err.message : 'שגיאת התחברות ל-Gmail.');
       setIsLoading(false);
     }
   };
 
-  // ── Disconnect ────────────────────────────────────────────────────────────
   const handleDisconnect = () => {
-    disconnectGmail();
+    try {
+      disconnectGmail();
+    } catch (err) {
+      console.error('Error disconnecting Gmail:', err);
+    }
     setIsConnected(false);
     setFetchedEmails([]);
     setGmailError(null);
-    // Clear in-memory action states — localStorage statuses are intentionally kept
-    // so handled/ignored emails stay dismissed if user reconnects later
     setTaskAddedIds(new Set());
     setEventAddedIds(new Set());
   };
@@ -529,70 +552,74 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
   };
 
   return (
-    <div className="card email-card">
-
+    <section className="important-emails-card">
       {/* Header */}
-      <div className="card-header">
+      <div className="important-emails-header">
         <div>
-          <div className="card-title-row">
-            <span className="card-icon">📬</span>
-            <h2 className="card-title">מיילים חשובים</h2>
-            {visibleEmails.length > 0 && (
-              <span className="badge badge-red">{visibleEmails.length}</span>
-            )}
-          </div>
-          <p className="email-card-subtitle">מוצגים רק מיילים שזוהתה בהם פעולה נדרשת.</p>
+          <h3>מיילים חשובים</h3>
+          <p>מוצגים רק מיילים שזוהתה בהם פעולה נדרשת.</p>
         </div>
+        <span className="important-emails-icon">📬</span>
       </div>
 
-      {/* Gmail connection row */}
-      <div className="email-integration-row">
-        <div className="email-connection-status">
-          <span className={`events-connection-dot ${isConnected ? 'connected' : 'disconnected'}`} />
-          <span className="email-connection-text">
-            {isLoading
-              ? 'מתחבר...'
-              : isConnected
-                ? 'מחובר ל־Gmail'
-                : 'לא מחובר ל־Gmail'}
-          </span>
-        </div>
-        <div className="email-connection-actions">
-          {!isConnected ? (
-            <button
-              className="email-connect-btn"
-              onClick={handleConnect}
-              disabled={isLoading}
-            >
-              {isLoading ? 'מתחבר...' : 'התחברות ל־Gmail'}
-            </button>
-          ) : (
-            <button
-              className="email-connect-btn email-connect-btn--disconnect"
-              onClick={handleDisconnect}
-            >
-              התנתק
-            </button>
-          )}
-        </div>
+      {/* Connection Row */}
+      <div className="gmail-connect-row">
+        <span className="gmail-status-text">
+          {isConnected ? 'מחובר ל-Gmail' : 'לא מחובר ל-Gmail'}
+        </span>
+        <button
+          type="button"
+          className={isConnected ? 'gmail-disconnect-button' : 'gmail-connect-button'}
+          onClick={isConnected ? handleDisconnect : handleConnect}
+          disabled={isLoading}
+        >
+          {isLoading ? 'מתחבר...' : (isConnected ? 'התנתק' : 'התחברות ל-Gmail')}
+        </button>
       </div>
 
       {/* Error message */}
       {gmailError && (
-        <div className="events-gcal-msg events-gcal-msg--error">
+        <div className="important-emails-error">
           <span>⚠️ {gmailError}</span>
           <button
-            className="events-gcal-msg-close"
+            type="button"
+            className="important-emails-error-close"
             onClick={() => setGmailError(null)}
             aria-label="סגור"
           >✕</button>
         </div>
       )}
 
-      {/* Body */}
-      {renderBody()}
-
-    </div>
+      {/* Empty State / Email List */}
+      <div className="important-emails-body">
+        {isLoading ? (
+          <p className="important-emails-empty">טוען מיילים מ־Gmail...</p>
+        ) : !isConnected ? (
+          <p className="important-emails-empty">אין מיילים להצגה כרגע. חברי Gmail כדי להציג מיילים חשובים שדורשים פעולה.</p>
+        ) : visibleEmails.length === 0 ? (
+          <p className="important-emails-empty">לא נמצאו מיילים חשובים שדורשים פעולה כרגע.</p>
+        ) : (
+          <div className="email-list">
+            {visibleEmails.map(email => (
+              <EmailItem
+                key={email.id}
+                email={email}
+                taskAdded={taskAddedIds.has(email.id)}
+                alreadyInTasks={
+                  !taskAddedIds.has(email.id) &&
+                  existingTaskTitles.has(taskTitleFor(email))
+                }
+                eventAdded={eventAddedIds.has(email.id)}
+                onAddTask={() => handleAddTask(email)}
+                onAddEvent={() => handleAddEvent(email)}
+                onMarkHandled={() => handleMarkHandled(email.id)}
+                onIgnore={() => handleIgnore(email.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 };
 

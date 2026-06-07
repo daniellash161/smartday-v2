@@ -174,7 +174,9 @@ const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
  * Excludes Gmail's automated category tabs (Promotions, Social, Updates,
  * Forums) because those rarely contain actionable emails.
  */
-const IMPORTANCE_QUERY = 'newer_than:14d is:unread -category:promotions -category:social -category:forums -category:updates';
+// Relaxed query: includes both read and unread emails from last 30 days
+// Removes unread-only filter to catch important emails user may have already read
+const IMPORTANCE_QUERY = 'newer_than:30d -category:promotions -category:social -category:forums -category:updates';
 
 /**
  * Fetch recent unread emails, classify them locally with strict actionability
@@ -376,7 +378,7 @@ function _classifyEmail(
 
   // ── Rule 1: Urgency ─────────────────────────────────────────────────────────
   if (P_URGENT.test(text)) {
-    if (ageDays > 14) return NOT_ACTIONABLE;
+    if (ageDays > 30) return NOT_ACTIONABLE;
     const category = _deriveCategory(text, domain);
     return {
       actionable: true,
@@ -387,12 +389,12 @@ function _classifyEmail(
     };
   }
 
-  // ── Age gate for non-urgent rules ──────────────────────────────────────────
-  if (ageDays > 14) return NOT_ACTIONABLE;
+  // ── Age gate for non-urgent rules (relaxed to 30 days) ─────────────────────
+  if (ageDays > 30) return NOT_ACTIONABLE;
 
   // ── Rule 2: Deadline phrase ─────────────────────────────────────────────────
   if (P_DEADLINE.test(text)) {
-    if (ageDays > 7) return NOT_ACTIONABLE;
+    if (ageDays > 14) return NOT_ACTIONABLE;
     const category = _deriveCategory(text, domain);
     return {
       actionable: true,
@@ -405,7 +407,7 @@ function _classifyEmail(
 
   // ── Rule 3: Payment with a problem indicator ────────────────────────────────
   if (P_PAYMENT_BASE.test(text) && P_PAYMENT_PROBLEM.test(text)) {
-    if (ageDays > 7) return NOT_ACTIONABLE;
+    if (ageDays > 14) return NOT_ACTIONABLE;
     return {
       actionable: true,
       reason:     'בעיה בתשלום',
@@ -417,7 +419,7 @@ function _classifyEmail(
 
   // ── Rule 4: Meeting / schedule change ──────────────────────────────────────
   if (P_MEETING.test(text)) {
-    if (ageDays > 7) return NOT_ACTIONABLE;
+    if (ageDays > 14) return NOT_ACTIONABLE;
     const isCancelled   = /בוטל|cancelled/.test(text);
     const isRescheduled = /שינוי מועד|נדחה|rescheduled/.test(text);
     const reason = isCancelled   ? 'פגישה בוטלה'
@@ -443,7 +445,7 @@ function _classifyEmail(
     P_IMPORTANT_TEXT.test(text);
 
   if (isImportantSender) {
-    if (ageDays > 7) return NOT_ACTIONABLE;
+    if (ageDays > 14) return NOT_ACTIONABLE;
     const category: EmailCategory =
       isAcademic ? 'academic'
       : isBank   ? 'payment'

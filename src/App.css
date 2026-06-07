@@ -148,66 +148,79 @@ textarea {
   background: var(--bg);
 }
 .dashboard-main {
-  max-width: 1380px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 28px 24px;
+  padding: 24px 32px 48px;
+  box-sizing: border-box;
 }
 .dashboard-full {
   margin-bottom: 24px;
 }
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 24px;
+  align-items: start;
 }
 .dashboard-col {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 @media (max-width: 900px) {
   .dashboard-grid { grid-template-columns: 1fr; }
-  .dashboard-main { padding: 20px 16px; }
+  .dashboard-main { padding: 20px 20px 40px; }
 }
 
 /* ---- Card ---- */
 .card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(23,32,51,0.06);
+  border: 1px solid #e7edf4;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease;
+  min-width: 0;
 }
 .card:hover {
-  box-shadow: var(--shadow);
+  box-shadow: 0 15px 35px rgba(23,32,51,0.1);
 }
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 26px 20px;
-  border-bottom: none;
+  padding: 18px 24px;
+  height: 64px;
+  border-bottom: 1px solid #eef2f6;
+  min-width: 0;
 }
 .card-title-row {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  flex: 1;
 }
 .card-icon {
   font-size: 20px;
   line-height: 1;
+  flex-shrink: 0;
 }
 .card-title {
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.2px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card-toggle {
   color: var(--text-muted);
   font-size: 12px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 /* ---- Badge ---- */
@@ -1515,47 +1528,346 @@ textarea {
   background: var(--accent-mint);
 }
 
-/* ---- Important Emails Card ---- */
-.emails-card,
+/* ---- Important Emails Card - Simple Clean Layout ---- */
 .important-emails-card {
-  border-top: 4px solid var(--accent-pink);
+  direction: rtl;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(23, 32, 51, 0.06);
+  overflow: hidden;
 }
 
-.emails-header,
-[class*="emails"][class*="header"],
-[class*="important"][class*="header"] {
+.important-emails-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 26px 20px;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.important-emails-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #172033;
+  font-weight: 800;
+}
+
+.important-emails-header p {
+  margin: 6px 0 0;
+  color: #7c8798;
+  font-size: 0.92rem;
+}
+
+.important-emails-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.gmail-connect-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 24px;
+  background: #f8fbfd;
+  border-bottom: 1px solid #eef2f6;
+  min-height: 72px;
+}
+
+.gmail-status-text {
+  color: #667085;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gmail-connect-button,
+.gmail-disconnect-button {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: 140px;
+  line-height: 1;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.gmail-connect-button {
+  background: #3fafa3;
+  color: white;
+}
+
+.gmail-connect-button:hover:not(:disabled) {
+  background: #34998f;
+}
+
+.gmail-connect-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.gmail-disconnect-button {
+  background: #fbe4ea;
+  color: #a4475b;
+}
+
+.gmail-disconnect-button:hover {
+  background: #f7d4de;
+}
+
+.important-emails-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.important-emails-empty {
+  padding: 22px 24px 28px;
+  text-align: center;
+  color: #7c8798;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.important-emails-error {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 10px 18px;
+  padding: 10px 14px;
+  background: #fbf0ef;
+  border: 1px solid #e8c0bc;
+  border-radius: 12px;
+  font-size: 13px;
+  color: #c0645a;
+  line-height: 1.5;
+}
+
+.important-emails-error-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c0645a;
+  font-size: 14px;
+  padding: 0;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.important-emails-error-close:hover {
+  opacity: 1;
+}
+
+.email-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.email-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2f6;
+  border-right: 4px solid transparent;
+  transition: background 0.15s ease;
+}
+
+.email-item:last-child {
   border-bottom: none;
 }
 
-.emails-title,
-[class*="emails"][class*="title"],
-[class*="important"][class*="title"] {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text);
+.email-item:hover {
+  background: #f8fbfd;
 }
 
-[class*="emails"][class*="connect"],
-[class*="important"][class*="connect"],
-[class*="gmail"][class*="button"] {
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 10px 18px;
+@media (max-width: 640px) {
+  .gmail-connect-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .gmail-connect-button,
+  .gmail-disconnect-button {
+    width: 100%;
+  }
+}
+
+.email-loading {
+  padding: 20px 18px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Email list container */
+.email-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Individual email item */
+.email-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2f6;
+  border-right: 4px solid transparent;
+  transition: background 0.15s ease;
+}
+
+.email-item:last-child {
+  border-bottom: none;
+}
+
+.email-item:hover {
+  background: var(--surface2);
+}
+
+.email-sender {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.email-subject {
+  font-size: 14px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
 }
 
-[class*="emails"][class*="connect"]:hover,
-[class*="important"][class*="connect"]:hover {
+.email-snippet {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.email-time {
+  font-size: 12px;
+  color: var(--text-light);
+}
+
+.email-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.email-badge {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 8px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.email-badge--source {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+.email-reason {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.email-primary-row {
+  margin-top: 4px;
+}
+
+.email-btn {
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.email-btn--primary {
+  background: var(--accent-teal);
+  color: #ffffff;
+}
+
+.email-btn--primary:hover {
+  background: #38a198;
+  box-shadow: 0 2px 6px rgba(63,175,163,0.15);
+}
+
+.email-btn--event {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+.email-btn--event:hover {
   background: #6a9fce;
-  box-shadow: 0 4px 12px rgba(125,183,232,0.2);
+}
+
+.email-btn--handled,
+.email-btn--review {
+  background: var(--surface2);
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.email-btn--handled:hover:not(:disabled),
+.email-btn--review:hover:not(:disabled) {
+  background: var(--primary-light);
+}
+
+.email-btn--done {
+  background: #e5f5f2;
+  color: var(--green);
+  cursor: default;
+  opacity: 0.7;
+}
+
+.email-secondary-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.email-sec-btn {
+  font-size: 11px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+
+.email-sec-btn:hover {
+  color: var(--primary);
+}
+
+.email-sec-btn--ignore:hover {
+  color: var(--red);
 }
 
 /* ---- Personal Widget ---- */
@@ -1813,3 +2125,101 @@ textarea:focus {
 .flex-center { align-items: center; justify-content: center; }
 .flex-between { justify-content: space-between; }
 .flex-wrap { flex-wrap: wrap; }
+
+/* =====================================================================
+   LAYOUT BUG FIXES - Minimal, targeted CSS only
+   ===================================================================== */
+
+/* 1. FIX: Calendar status text - prevent wrapping */
+.events-connection-bar {
+  flex-wrap: nowrap;
+}
+
+.events-connection-status {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* 2. FIX: Payments upload area styling */
+input[type="file"] {
+  display: none;
+}
+
+/* 3. FIX: Gmail button - prevent text overlap */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: fit-content;
+}
+
+/* 4. FIX: Personal widget textarea height */
+textarea {
+  height: 120px;
+  resize: vertical;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid #dbe5ee;
+  background: #f9fbfd;
+  font-family: inherit;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+/* 5. FIX: Alert action buttons - compact pills */
+.alert-action-btn {
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.alert-action-btn:hover {
+  background: var(--accent-mint);
+  color: var(--accent-teal);
+}
+
+/* 6. FIX: Prevent text overflow in cards */
+.card-title,
+.card-header {
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: normal;
+  line-height: 1.5;
+  min-width: 0;
+}
+
+/* 7. FIX: Select dropdown */
+select {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(125,183,232,0.1);
+}
