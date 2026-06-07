@@ -1512,6 +1512,79 @@ textarea {
   overflow: hidden;
 }
 
+/* ---- Payments Card Header Overlap Fix ---- */
+.payments-card .card-header,
+.payments-insights-card .card-header {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 24px 20px;
+  min-height: auto;
+  height: auto;
+  overflow: visible;
+  background: transparent;
+  border-bottom: 1px solid #eef2f6;
+  text-align: center;
+}
+
+.payments-card .card-title-row,
+.payments-insights-card .card-title-row {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  direction: rtl;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.payments-card .card-title-row h2,
+.payments-card .card-title-row h3,
+.payments-insights-card .card-title-row h2,
+.payments-insights-card .card-title-row h3 {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #172033;
+  font-size: 1.22rem;
+  font-weight: 800;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.payments-card .card-icon,
+.payments-insights-card .card-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  flex: 0 0 auto;
+  margin-top: 0;
+}
+
+.payments-card .payments-subtitle,
+.payments-insights-card .payments-subtitle {
+  margin: 0;
+  color: #7c8798;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  max-width: 680px;
+  text-align: center;
+}
+
+.payments-card .payments-upload-zone,
+.payments-insights-card .payments-upload-zone {
+  margin-top: 18px;
+}
+
 .payments-header,
 [class*="payments"][class*="header"] {
   display: flex;
