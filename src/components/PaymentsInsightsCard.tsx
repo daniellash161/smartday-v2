@@ -1155,21 +1155,70 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       {/* ═══ Compact Mode ═══ */}
       {compact && (step === 'insights' || showingSaved) && displayAnalysis !== null && (
         <div className="pi-compact-summary">
-          <div className="pi-summary">
-            <p className="pi-summary-line">{buildSummaryLine(displayAnalysis)}</p>
-            <SummaryChips a={displayAnalysis} />
-          </div>
-          {displayAnalysis.reminders.length > 0 && (
-            <div className="pi-compact-reminders">
-              <p className="pi-compact-label">תזכורות חכמות:</p>
-              <p className="pi-compact-count">{displayAnalysis.reminders.length} תזכורות</p>
+          {/* File summary row */}
+          {savedData && (
+            <div className="pi-compact-file-row">
+              <span className="pi-compact-provider">{PROVIDER_DISPLAY_NAMES[savedData.provider]}</span>
+              <span className="pi-compact-file-name">{savedData.fileName.slice(0, 20)}{savedData.fileName.length > 20 ? '…' : ''}</span>
+              <span className="pi-compact-time">{fmtDateShort(savedData.analyzedAt.split('T')[0])}</span>
+              <span className="pi-compact-count">{
+                displayAnalysis.fixedPayments.length +
+                displayAnalysis.subscriptions.length +
+                displayAnalysis.installments.length +
+                displayAnalysis.anomalies.length +
+                displayAnalysis.reminders.length
+              } תובנות</span>
             </div>
           )}
-          {onOpenModal && (
-            <button className="pi-compact-open-btn" onClick={onOpenModal}>
-              פתח תובנות תשלומים ›
-            </button>
-          )}
+
+          {/* Summary line */}
+          <p className="pi-compact-summary-line">{buildSummaryLine(displayAnalysis)}</p>
+
+          {/* Statistic chips */}
+          <div className="pi-compact-chips">
+            {displayAnalysis.fixedPayments.length > 0 && (
+              <span className="pi-chip">🔁 הוראות קבע ({displayAnalysis.fixedPayments.length})</span>
+            )}
+            {displayAnalysis.installments.length > 0 && (
+              <span className="pi-chip">📦 תשלומים ({displayAnalysis.installments.length})</span>
+            )}
+            {displayAnalysis.reminders.length > 0 && (
+              <span className="pi-chip">⏰ תזכורות ({displayAnalysis.reminders.length})</span>
+            )}
+            {displayAnalysis.anomalies.length > 0 && (
+              <span className="pi-chip pi-chip--anomaly">⚠️ חריגים ({displayAnalysis.anomalies.length})</span>
+            )}
+          </div>
+
+          {/* Top 1-2 insights only */}
+          <div className="pi-compact-insights">
+            {displayAnalysis.reminders.length > 0 && displayAnalysis.reminders.slice(0, 1).map((r, idx) => (
+              <div key={idx} className="pi-compact-insight-item">
+                <span className="pi-insight-label">תזכורת קרובה:</span>
+                <span className="pi-insight-text">{r.merchant} · צפוי לרדת ב-{fmtDateShort(r.chargeDate)}</span>
+              </div>
+            ))}
+            {displayAnalysis.subscriptions.length > 0 && displayAnalysis.subscriptions.slice(0, 1).map((s, idx) => (
+              <div key={idx} className="pi-compact-insight-item">
+                <span className="pi-insight-label">מנוי חוזר:</span>
+                <span className="pi-insight-text">{s.merchant}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Action buttons */}
+          <div className="pi-compact-actions">
+            {onOpenModal && (
+              <button className="pi-compact-open-btn" onClick={onOpenModal}>
+                פתח תובנות תשלומים
+              </button>
+            )}
+            <label className="pi-compact-clear-btn">
+              <input type="file" accept="application/pdf,.pdf"
+                className="payments-file-input" onChange={handleFileChange} />
+              נקה ניתוח
+            </label>
+          </div>
         </div>
       )}
 

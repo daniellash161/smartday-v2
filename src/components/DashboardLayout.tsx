@@ -5,6 +5,7 @@ import TaskList from './TaskList';
 import EventsCard from './EventsCard';
 import AlertsCard from './AlertsCard';
 import AiAssistant from './AiAssistant';
+import PaymentsModal from './PaymentsModal';
 import type { Task } from '../types';
 import { mockTasks } from '../data/mockData';
 
@@ -17,6 +18,7 @@ const PersonalWidget = lazy(() => import('./PersonalWidget'));
 const DashboardLayout = () => {
   // Task state lives here so EventsCard suggestions can add to the same list
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -64,7 +66,12 @@ const DashboardLayout = () => {
           <div className="dashboard-col">
             <AlertsCard />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
-              <PaymentsInsightsCard onAddTask={addTask} onAddEvent={addEvent} />
+              <PaymentsInsightsCard
+                compact={true}
+                onAddTask={addTask}
+                onAddEvent={addEvent}
+                onOpenModal={() => setShowPaymentsModal(true)}
+              />
             </Suspense>
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <ImportantEmailsCard onAddTask={addTask} onAddEvent={addEvent} existingTaskTitles={existingTaskTitles} />
@@ -73,6 +80,19 @@ const DashboardLayout = () => {
           </div>
         </section>
       </main>
+
+      {/* Payments Modal */}
+      {showPaymentsModal && (
+        <PaymentsModal onClose={() => setShowPaymentsModal(false)}>
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+            <PaymentsInsightsCard
+              compact={false}
+              onAddTask={addTask}
+              onAddEvent={addEvent}
+            />
+          </Suspense>
+        </PaymentsModal>
+      )}
     </div>
   );
 };

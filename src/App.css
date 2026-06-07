@@ -1681,6 +1681,155 @@ textarea {
   background: var(--accent-mint);
 }
 
+/* ---- Compact Summary (Dashboard) ---- */
+.pi-compact-summary {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pi-compact-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.pi-compact-provider {
+  font-weight: 700;
+  color: var(--text);
+  min-width: fit-content;
+}
+
+.pi-compact-file-name {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.pi-compact-time {
+  white-space: nowrap;
+}
+
+.pi-compact-count {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.pi-compact-summary-line {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.pi-compact-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.pi-chip--anomaly {
+  background: #fde8e3;
+  color: var(--red);
+}
+
+.pi-compact-insights {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+}
+
+.pi-compact-insight-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.pi-insight-label {
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: fit-content;
+}
+
+.pi-insight-text {
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.pi-compact-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.pi-compact-open-btn {
+  flex: 1;
+  background: var(--accent-beige);
+  color: #8b7355;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.pi-compact-open-btn:hover {
+  background: #e8d9c6;
+  box-shadow: 0 2px 6px rgba(139, 115, 85, 0.15);
+}
+
+.pi-compact-clear-btn {
+  flex: 1;
+  background: var(--surface2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pi-compact-clear-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
 /* ---- Payments Insights & Analysis ---- */
 .payments-file-section {
   padding: 24px;
@@ -1881,6 +2030,57 @@ textarea {
   margin: 0;
   padding-top: 8px;
   border-top: 1px solid var(--border);
+}
+
+/* ---- Payments Modal ---- */
+.pm-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.pm-modal {
+  position: relative;
+  background: #ffffff;
+  border-radius: 22px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 90%;
+  border: 1px solid var(--border);
+}
+
+.pm-close-btn {
+  position: sticky;
+  top: 0;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 12px 8px;
+  line-height: 1;
+  z-index: 10;
+  transition: color 0.2s ease;
+  float: left;
+}
+
+.pm-close-btn:hover {
+  color: var(--red);
+}
+
+.pm-content {
+  clear: both;
+  padding: 24px;
 }
 
 /* ---- Important Emails Card - Simple Clean Layout ---- */
