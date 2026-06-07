@@ -292,21 +292,17 @@ const RecCard = ({
 
 // Recommendations panel
 interface SmartRecsProps {
-  todayEvents: CalendarEvent[];
-  tomorrowEvents: CalendarEvent[];
+  allEvents: CalendarEvent[];
   existingTaskTitles: Set<string>;
   onAddTasks: (tasks: Omit<Task, 'id'>[]) => void;
 }
 
 const SmartRecommendations = ({
-  todayEvents, tomorrowEvents, existingTaskTitles, onAddTasks,
+  allEvents, existingTaskTitles, onAddTasks,
 }: SmartRecsProps) => {
-  // Merge today and tomorrow events for passing to buildRecs
-  const weekEvents = [...todayEvents, ...tomorrowEvents];
-
   const recs = useMemo(
-    () => buildRecs(weekEvents),
-    [weekEvents],
+    () => buildRecs(allEvents),
+    [allEvents],
   );
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   const [showAllRecommendations, setShowAllRecommendations] = useState(false);
@@ -687,8 +683,7 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
       {/* ── Smart recommendations (only if source connected) ── */}
       {isSourceConnected && (
         <SmartRecommendations
-          todayEvents={todayEvents}
-          tomorrowEvents={tomorrowEvents}
+          allEvents={allEvents}
           existingTaskTitles={existingTaskTitles}
           onAddTasks={onAddTasks}
         />

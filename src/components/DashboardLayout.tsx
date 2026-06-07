@@ -133,7 +133,11 @@ const DashboardLayout = () => {
       <Header />
       <main className="dashboard-main">
         <section className="dashboard-full">
-          <DailySummaryCard />
+          <DailySummaryCard
+            tasks={tasks}
+            calendarEvents={calendarEvents}
+            newsCount={newsItems.length}
+          />
         </section>
 
         <section className="dashboard-full">
