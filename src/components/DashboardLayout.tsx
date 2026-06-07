@@ -52,22 +52,19 @@ const DashboardLayout = () => {
         </section>
 
         <section className="dashboard-full">
-          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
-            <NewsUpdatesCard
-              compact={true}
-              onOpenModal={() => setShowNewsModal(true)}
-              onItemsLoaded={(items) => setNewsItems(items)}
-              demoMode={newsDemoMode}
-            />
-          </Suspense>
-        </section>
-
-        <section className="dashboard-full">
           <EventsCard onAddTasks={addTasks} existingTaskTitles={existingTaskTitles} />
         </section>
 
         <section className="dashboard-grid">
           <div className="dashboard-col">
+            <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+              <NewsUpdatesCard
+                compact={true}
+                onOpenModal={() => setShowNewsModal(true)}
+                onItemsLoaded={(items) => setNewsItems(items)}
+                demoMode={newsDemoMode}
+              />
+            </Suspense>
             <TaskList tasks={tasks} onToggle={toggleTask} />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <PersonalWidget onAddTask={addTask} />

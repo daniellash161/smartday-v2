@@ -2,6 +2,10 @@ import { useState } from 'react';
 import type { Task } from '../types';
 import { sortByPriority, priorityLabel, priorityColor, formatDate, isToday, isTomorrow } from '../utils/priority';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Task Item Component
+// ─────────────────────────────────────────────────────────────────────────────
+
 const TaskItem = ({ task, onToggle }: { task: Task; onToggle: (id: string) => void }) => {
   const color = priorityColor[task.priority];
   const label = priorityLabel[task.priority];
@@ -13,64 +17,160 @@ const TaskItem = ({ task, onToggle }: { task: Task; onToggle: (id: string) => vo
     : formatDate(task.dueDate);
 
   return (
-    <div className={`task-item ${task.completed ? 'task-done' : ''}`}>
-      <div className="task-left">
-        <button
-          className={`task-checkbox ${task.completed ? 'checked' : ''}`}
-          onClick={() => onToggle(task.id)}
-          aria-label="סמן כבוצע"
-        >
-          {task.completed && <span>✓</span>}
-        </button>
-        <div className="task-info">
-          <span className="task-title">{task.title}</span>
-          {task.description && <span className="task-desc">{task.description}</span>}
+    <div className={`tl-task-item ${task.completed ? 'tl-task-done' : ''}`}>
+      <button
+        className={`tl-task-checkbox ${task.completed ? 'tl-checked' : ''}`}
+        onClick={() => onToggle(task.id)}
+        aria-label="סמן כבוצע"
+        title={task.completed ? 'בוצע' : 'לא בוצע'}
+      >
+        {task.completed ? '✓' : ''}
+      </button>
+
+      <div className="tl-task-content">
+        <div className="tl-task-title-row">
+          <span className={`tl-task-title ${task.completed ? 'tl-task-title-done' : ''}`}>
+            {task.title}
+          </span>
         </div>
+        {task.description && <p className="tl-task-desc">{task.description}</p>}
       </div>
-      <div className="task-right">
-        <span className="task-priority-badge" style={{ background: color + '22', color }}>
+
+      <div className="tl-task-meta">
+        <span className="tl-task-priority" style={{ background: color + '22', color }}>
           {label}
         </span>
-        <span className="task-due">{dueDateLabel}</span>
-        <span className="task-category">{task.category}</span>
+        <span className="tl-task-category">{task.category}</span>
+        <span className="tl-task-date">{dueDateLabel}</span>
       </div>
     </div>
   );
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main TaskList Component
+// ─────────────────────────────────────────────────────────────────────────────
 
 interface TaskListProps {
   tasks: Task[];
   onToggle: (id: string) => void;
 }
 
-const TaskList = ({ tasks, onToggle }: TaskListProps) => {
-  const [showDone, setShowDone] = useState(false);
+type FilterType = 'all' | 'today' | 'urgent' | 'in-progress' | 'done' | 'smart';
 
-  const pending = sortByPriority(tasks.filter((t) => !t.completed));
-  const done    = tasks.filter((t) => t.completed);
+const TaskList = ({ tasks, onToggle }: TaskListProps) => {
+  const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
+
+  const allCount = tasks.length;
+  const urgentCount = tasks.filter((t) => t.priority === 'high' && !t.completed).length;
+  const todayCount = tasks.filter((t) => isToday(t.dueDate) && !t.completed).length;
+  const doneCount = tasks.filter((t) => t.completed).length;
+
+  // Filter tasks based on selection
+  const getFilteredTasks = () => {
+    let filtered = tasks;
+
+    if (selectedFilter === 'today') {
+      filtered = tasks.filter((t) => isToday(t.dueDate) && !t.completed);
+    } else if (selectedFilter === 'urgent') {
+      filtered = tasks.filter((t) => t.priority === 'high' && !t.completed);
+    } else if (selectedFilter === 'in-progress') {
+      filtered = tasks.filter((t) => !t.completed);
+    } else if (selectedFilter === 'done') {
+      filtered = tasks.filter((t) => t.completed);
+    } else if (selectedFilter === 'smart') {
+      // Smart suggestions: high priority or due today
+      filtered = tasks.filter((t) => (t.priority === 'high' || isToday(t.dueDate)) && !t.completed);
+    }
+
+    return sortByPriority(filtered);
+  };
+
+  const filteredTasks = getFilteredTasks();
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <div className="card-title-row">
-          <span className="card-icon">✅</span>
-          <h2 className="card-title">משימות</h2>
-          <span className="badge">{pending.length}</span>
+    <div className="tl-card">
+      {/* Header */}
+      <div className="tl-header">
+        <button className="tl-add-btn" title="הוסף משימה חדשה">
+          + הוסף משימה
+        </button>
+        <div className="tl-header-content">
+          <h2 className="tl-title">משימות ✅</h2>
+          <p className="tl-subtitle">המשימות שלך מסודרות לפי דחיפות ודדליין</p>
         </div>
       </div>
-      <div className="task-list">
-        {pending.map((t) => (
-          <TaskItem key={t.id} task={t} onToggle={onToggle} />
-        ))}
-      </div>
-      {done.length > 0 && (
-        <div className="task-done-section">
-          <button className="show-done-btn" onClick={() => setShowDone((s) => !s)}>
-            {showDone ? 'הסתר' : 'הצג'} משימות שהושלמו ({done.length})
-          </button>
-          {showDone && done.map((t) => <TaskItem key={t.id} task={t} onToggle={onToggle} />)}
+
+      {/* Summary Strip */}
+      <div className="tl-summary-strip">
+        <div className="tl-stat-col tl-stat-total">
+          <span className="tl-stat-number">{allCount}</span>
+          <span className="tl-stat-label">סה״כ</span>
         </div>
-      )}
+        <div className="tl-stat-col tl-stat-urgent">
+          <span className="tl-stat-number">{urgentCount}</span>
+          <span className="tl-stat-label">דחופות</span>
+        </div>
+        <div className="tl-stat-col tl-stat-today">
+          <span className="tl-stat-number">{todayCount}</span>
+          <span className="tl-stat-label">להיום</span>
+        </div>
+        <div className="tl-stat-col tl-stat-done">
+          <span className="tl-stat-number">{doneCount}</span>
+          <span className="tl-stat-label">הושלמו</span>
+        </div>
+      </div>
+
+      {/* Filter Chips */}
+      <div className="tl-filters">
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'all' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('all')}
+        >
+          הכל
+        </button>
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'today' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('today')}
+        >
+          היום
+        </button>
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'urgent' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('urgent')}
+        >
+          דחופות
+        </button>
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'in-progress' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('in-progress')}
+        >
+          בתהליך
+        </button>
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'done' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('done')}
+        >
+          הושלמו
+        </button>
+        <button
+          className={`tl-filter-chip ${selectedFilter === 'smart' ? 'tl-filter-active' : ''}`}
+          onClick={() => setSelectedFilter('smart')}
+        >
+          המלצות חכמות
+        </button>
+      </div>
+
+      {/* Task List */}
+      <div className="tl-task-list">
+        {filteredTasks.length === 0 ? (
+          <div className="tl-empty-state">אין משימות בסינון הנבחר.</div>
+        ) : (
+          filteredTasks.map((task) => (
+            <TaskItem key={task.id} task={task} onToggle={onToggle} />
+          ))
+        )}
+      </div>
     </div>
   );
 };
