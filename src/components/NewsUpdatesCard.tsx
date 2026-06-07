@@ -59,62 +59,51 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
     () => propDemoMode ?? getUserPreference(PREF.NEWS_DEMO_ENABLED, false),
   );
   const [lastUpdated, setLastUpdated] = useState<string>(new Date().toISOString());
-  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Fetch news on mount or when demo mode changes
-  useEffect(() => {
+  // Initial load of news
+  const loadNews = async () => {
     if (demoMode) {
       setItems(DEMO_NEWS);
       setStatus('demo');
       onItemsLoaded?.(DEMO_NEWS);
+      setLoadError(null);
       return;
     }
 
     setStatus('loading');
-    fetchMorningNews()
-      .then(data => {
-        setItems(data);
-        onItemsLoaded?.(data);
-        setStatus(data.length === 0 ? 'error' : 'success');
-      })
-      .catch(() => {
-        setItems([]);
-        onItemsLoaded?.([]);
-        setStatus('error');
-      });
+    setLoadError(null);
+
+    try {
+      const data = await fetchMorningNews();
+      setItems(data);
+      onItemsLoaded?.(data);
+      setStatus(data.length === 0 ? 'error' : 'success');
+      setLoadError(null);
+    } catch {
+      setItems([]);
+      onItemsLoaded?.([]);
+      setStatus('error');
+      setLoadError('לא הצלחנו למשוך עדכונים כרגע.');
+    }
+  };
+
+  // Fetch news on mount or when demo mode changes
+  useEffect(() => {
+    loadNews();
   }, [demoMode, onItemsLoaded]);
 
-  const enableDemo = () => {
-    setUserPreference(PREF.NEWS_DEMO_ENABLED, true);
-    setDemoMode(true);
-  };
-
-  const retryFetch = () => {
-    setStatus('loading');
-    setRefreshError(null);
-    fetchMorningNews()
-      .then(data => {
-        setItems(data);
-        onItemsLoaded?.(data);
-        setLastUpdated(new Date().toISOString());
-        setStatus(data.length === 0 ? 'error' : 'success');
-      })
-      .catch(() => {
-        setItems([]);
-        onItemsLoaded?.([]);
-        setStatus('error');
-      });
-  };
-
+  // Refresh existing news (only updates items, doesn't change main status)
   const refreshNews = () => {
     if (demoMode) {
       setLastUpdated(new Date().toISOString());
       return;
     }
+
     setIsRefreshing(true);
-    setRefreshError(null);
-    setStatus('loading');
+    setLoadError(null);
+
     fetchMorningNews()
       .then(data => {
         if (data.length > 0) {
@@ -122,16 +111,14 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
           onItemsLoaded?.(data);
           setLastUpdated(new Date().toISOString());
           setStatus('success');
-          setRefreshError(null);
         } else {
-          setRefreshError('לא זוהו עדכונים חדשים כרגע.');
-          setStatus('error');
+          setLoadError('לא זוהו עדכונים חדשים כרגע.');
         }
-        setIsRefreshing(false);
       })
       .catch(() => {
-        setRefreshError('לא הצלחנו לרענן כרגע. המידע הקודם עדיין זמין.');
-        setStatus('error');
+        setLoadError('לא הצלחנו לרענן כרגע. המידע הקודם עדיין זמין.');
+      })
+      .finally(() => {
         setIsRefreshing(false);
       });
   };
@@ -151,27 +138,31 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
         </div>
       </div>
 
-      {/* Content */}
-      {status === 'loading' && (
+      {/* Loading state — only on initial load with no items yet */}
+      {status === 'loading' && items.length === 0 && (
         <div className="news-empty-state">⏳ טוענים עדכוני בוקר...</div>
       )}
 
-      {status === 'error' && items.length === 0 && !refreshError && (
+      {/* Error state — only if no items loaded */}
+      {status === 'error' && items.length === 0 && !loadError && (
         <div className="news-error-state">
           <p>לא הצלחנו למשוך עדכונים כרגע.</p>
         </div>
       )}
 
-      {refreshError && (
+      {/* Refresh error — show if refresh fails but keep existing items visible */}
+      {loadError && (
         <div className="news-error-state">
-          <p>{refreshError}</p>
+          <p>{loadError}</p>
         </div>
       )}
 
-      {items.length === 0 && status !== 'loading' && status !== 'error' && !refreshError && (
+      {/* No items state */}
+      {items.length === 0 && status !== 'loading' && status !== 'error' && !loadError && (
         <div className="news-empty-state">אין עדכונים חשובים כרגע.</div>
       )}
 
+      {/* Show main news item if available */}
       {mainItem && (
         <div className="news-main-item">
           <p className="news-main-item-title">{mainItem.title}</p>
@@ -205,15 +196,6 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
         >
           {isRefreshing ? 'מרענן...' : 'רענן'}
         </button>
-        {status === 'error' && (
-          <button
-            className="news-refresh-button"
-            onClick={retryFetch}
-            type="button"
-          >
-            נסה שוב
-          </button>
-        )}
       </div>
     </div>
   );
