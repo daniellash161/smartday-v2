@@ -325,10 +325,9 @@ interface EventsCardProps {
   events?: CalendarEvent[];
   onAddTasks: (tasks: Omit<Task, 'id'>[]) => void;
   existingTaskTitles: Set<string>;
-  onShowFutureEvents?: () => void;
 }
 
-const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onShowFutureEvents }: EventsCardProps) => {
+const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: EventsCardProps) => {
   // Calendar source selection with persistence
   const [calendarSource, setCalendarSource] = usePersistentState<'google' | 'apple'>(PREF.CALENDAR_SOURCE, 'google');
 
@@ -347,13 +346,19 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onSho
   // Select events based on calendar source
   const sourceEvents = calendarSource === 'google' ? gcalEvents : appleEvents;
 
-  // Merge mock events + selected source events; deduplicate by id
+  // Check if calendar source is connected/imported
+  const isSourceConnected = calendarSource === 'google' ? isConnected : appleEvents.length > 0;
+
+  // Use source events if connected, otherwise show empty state (NOT mockEvents)
+  // This prevents demo recommendations from showing when a real source is selected
   const allEvents = useMemo(() => {
-    const map = new Map<string, CalendarEvent>();
-    events.forEach(e => map.set(e.id, e));
-    sourceEvents.forEach(e => map.set(e.id, e));
-    return Array.from(map.values());
-  }, [events, sourceEvents]);
+    if (!isSourceConnected) {
+      // No real events from selected source - show only empty state
+      return [];
+    }
+    // Use only real events from selected source
+    return sourceEvents;
+  }, [sourceEvents, isSourceConnected]);
 
   const sorted = [...allEvents].sort(
     (a, b) =>
@@ -530,19 +535,34 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onSho
         </>
       )}
 
-      {/* ── Day sections ── */}
-      <div className="sched-body">
-        <DaySection label="היום"  events={todayEvents}    nextEventId={nextEvent?.id} />
-        <DaySection label="מחר"   events={tomorrowEvents} nextEventId={undefined} />
-      </div>
+      {/* ── Empty State when no source connected ── */}
+      {!isSourceConnected && (
+        <div style={{ padding: '32px 24px', textAlign: 'center', color: '#7c8798' }}>
+          <p style={{ margin: 0, fontSize: '0.95rem' }}>
+            {calendarSource === 'google'
+              ? 'לא מחובר ל-Google Calendar'
+              : 'לא יובאו לוחות Apple Calendar'}
+          </p>
+        </div>
+      )}
 
-      {/* ── Smart recommendations ── */}
-      <SmartRecommendations
-        todayEvents={todayEvents}
-        tomorrowEvents={tomorrowEvents}
-        existingTaskTitles={existingTaskTitles}
-        onAddTasks={onAddTasks}
-      />
+      {/* ── Day sections (only if source connected) ── */}
+      {isSourceConnected && (
+        <div className="sched-body">
+          <DaySection label="היום"  events={todayEvents}    nextEventId={nextEvent?.id} />
+          <DaySection label="מחר"   events={tomorrowEvents} nextEventId={undefined} />
+        </div>
+      )}
+
+      {/* ── Smart recommendations (only if source connected) ── */}
+      {isSourceConnected && (
+        <SmartRecommendations
+          todayEvents={todayEvents}
+          tomorrowEvents={tomorrowEvents}
+          existingTaskTitles={existingTaskTitles}
+          onAddTasks={onAddTasks}
+        />
+      )}
     </div>
   );
 };

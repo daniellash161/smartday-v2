@@ -52,7 +52,10 @@ const DashboardLayout = () => {
         </section>
 
         <section className="dashboard-full">
-          <EventsCard onAddTasks={addTasks} existingTaskTitles={existingTaskTitles} />
+          <EventsCard
+            onAddTasks={addTasks}
+            existingTaskTitles={existingTaskTitles}
+          />
         </section>
 
         <section className="dashboard-grid">
