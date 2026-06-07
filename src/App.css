@@ -1693,6 +1693,43 @@ textarea {
   color: #C0645A;
 }
 
+/* ── Future Calendar Button ── */
+.events-future-btn-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+
+.events-future-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: #7db7e8;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(125, 183, 232, 0.2);
+}
+
+.events-future-btn:hover {
+  background: #5fa7dd;
+  box-shadow: 0 6px 16px rgba(125, 183, 232, 0.3);
+  transform: translateY(-1px);
+}
+
+.events-future-btn:active {
+  transform: translateY(0);
+}
+
 /* =====================================================================
    ADVANCED COMPONENTS STYLING
    ===================================================================== */

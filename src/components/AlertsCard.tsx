@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import type { Alert } from '../types';
+import { useState, useMemo } from 'react';
+import type { Alert, CalendarEvent } from '../types';
 import { mockAlerts } from '../data/mockData';
 import { priorityColor } from '../utils/priority';
+import { generateSmartAlertsFromEvents } from '../utils/alertGenerator';
 
 const alertTypeIcon: Record<Alert['type'], string> = {
   payment: '💳',
@@ -31,10 +32,25 @@ const AlertItem = ({ alert, onDismiss }: { alert: Alert; onDismiss: (id: string)
   );
 };
 
-const AlertsCard = () => {
-  const [alerts, setAlerts] = useState<Alert[]>(mockAlerts);
+interface AlertsCardProps {
+  calendarEvents?: CalendarEvent[];
+}
 
-  const dismiss = (id: string) => setAlerts((prev) => prev.filter((a) => a.id !== id));
+const AlertsCard = ({ calendarEvents = [] }: AlertsCardProps) => {
+  // Generate smart alerts from real calendar events
+  const generatedAlerts = useMemo(
+    () => generateSmartAlertsFromEvents(calendarEvents),
+    [calendarEvents],
+  );
+
+  // Use mockAlerts as fallback only if no real alerts exist
+  const initialAlerts = generatedAlerts.length > 0 ? generatedAlerts : [];
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
+
+  // Filter out dismissed alerts
+  const alerts = initialAlerts.filter(a => !dismissedIds.has(a.id));
+
+  const dismiss = (id: string) => setDismissedIds((prev) => new Set(prev).add(id));
 
   if (alerts.length === 0) {
     return (
@@ -45,7 +61,7 @@ const AlertsCard = () => {
             <h2 className="card-title">התראות חכמות</h2>
           </div>
         </div>
-        <p className="empty-state">✅ אין התראות פתוחות — הכל תקין!</p>
+        <p className="empty-state">✅ אין התראות דחופות כרגע.</p>
       </div>
     );
   }

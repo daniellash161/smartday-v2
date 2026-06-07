@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { CalendarEvent, EventCategory, EventSource, Task } from '../types';
 import { mockEvents } from '../data/mockData';
 import { isToday, isTomorrow } from '../utils/priority';
@@ -325,9 +325,11 @@ interface EventsCardProps {
   events?: CalendarEvent[];
   onAddTasks: (tasks: Omit<Task, 'id'>[]) => void;
   existingTaskTitles: Set<string>;
+  onCalendarEventsUpdate?: (events: CalendarEvent[]) => void;
+  onOpenFutureEvents?: () => void;
 }
 
-const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: EventsCardProps) => {
+const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCalendarEventsUpdate, onOpenFutureEvents }: EventsCardProps) => {
   // Calendar source selection with persistence
   const [calendarSource, setCalendarSource] = usePersistentState<'google' | 'apple'>(PREF.CALENDAR_SOURCE, 'google');
 
@@ -359,6 +361,11 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
     // Use only real events from selected source
     return sourceEvents;
   }, [sourceEvents, isSourceConnected]);
+
+  // Notify parent about calendar events for alert generation and future view
+  useEffect(() => {
+    onCalendarEventsUpdate?.(allEvents);
+  }, [allEvents, onCalendarEventsUpdate]);
 
   const sorted = [...allEvents].sort(
     (a, b) =>
@@ -533,6 +540,19 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
             </div>
           )}
         </>
+      )}
+
+      {/* ── Future Calendar Button ── */}
+      {isSourceConnected && allEvents.length > 0 && (
+        <div className="events-future-btn-bar">
+          <button
+            className="events-future-btn"
+            onClick={onOpenFutureEvents}
+            type="button"
+          >
+            📅 לוח קדימה
+          </button>
+        </div>
       )}
 
       {/* ── Empty State when no source connected ── */}

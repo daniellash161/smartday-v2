@@ -7,7 +7,7 @@ import AlertsCard from './AlertsCard';
 import AiAssistant from './AiAssistant';
 import PaymentsModal from './PaymentsModal';
 import NewsModal from './NewsModal';
-import type { Task } from '../types';
+import type { Task, CalendarEvent, EventCategory } from '../types';
 import type { NewsItem } from '../services/newsService';
 import { mockTasks } from '../data/mockData';
 
@@ -16,6 +16,7 @@ const NewsUpdatesCard = lazy(() => import('./NewsUpdatesCard'));
 const PaymentsInsightsCard = lazy(() => import('./PaymentsInsightsCard'));
 const ImportantEmailsCard = lazy(() => import('./ImportantEmailsCard'));
 const PersonalWidget = lazy(() => import('./PersonalWidget'));
+const FutureEventsPanel = lazy(() => import('./FutureEventsPanel'));
 
 const DashboardLayout = () => {
   // Task state lives here so EventsCard suggestions can add to the same list
@@ -24,6 +25,11 @@ const DashboardLayout = () => {
   const [showNewsModal, setShowNewsModal] = useState(false);
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
   const [newsDemoMode, setNewsDemoMode] = useState(false);
+
+  // Calendar state for future events modal
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [showFutureEvents, setShowFutureEvents] = useState(false);
+  const [categoryOverrides, setCategoryOverrides] = useState<Record<string, EventCategory>>({});
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -43,6 +49,10 @@ const DashboardLayout = () => {
 
   const existingTaskTitles = new Set(tasks.map((t) => t.title));
 
+  const handleCategoryOverride = (id: string, cat: EventCategory) => {
+    setCategoryOverrides(prev => ({ ...prev, [id]: cat }));
+  };
+
   return (
     <div className="dashboard-root" dir="rtl">
       <Header />
@@ -55,6 +65,8 @@ const DashboardLayout = () => {
           <EventsCard
             onAddTasks={addTasks}
             existingTaskTitles={existingTaskTitles}
+            onCalendarEventsUpdate={setCalendarEvents}
+            onOpenFutureEvents={() => setShowFutureEvents(true)}
           />
         </section>
 
@@ -74,7 +86,7 @@ const DashboardLayout = () => {
             </Suspense>
           </div>
           <div className="dashboard-col">
-            <AlertsCard />
+            <AlertsCard calendarEvents={calendarEvents} />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <PaymentsInsightsCard
                 compact={true}
@@ -113,6 +125,19 @@ const DashboardLayout = () => {
           existingTaskTitles={existingTaskTitles}
           onClose={() => setShowNewsModal(false)}
         />
+      )}
+
+      {/* Future Events Modal */}
+      {showFutureEvents && (
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
+          <FutureEventsPanel
+            allEvents={calendarEvents}
+            categoryOverrides={categoryOverrides}
+            onCategoryOverride={handleCategoryOverride}
+            hasCalendar={calendarEvents.length > 0}
+            onClose={() => setShowFutureEvents(false)}
+          />
+        </Suspense>
       )}
     </div>
   );
