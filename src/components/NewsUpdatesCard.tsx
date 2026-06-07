@@ -179,19 +179,28 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
 
       {/* Actions */}
       <div className="news-actions">
-        <button className="news-open-button" onClick={onOpenModal}>
+        <button
+          className="news-open-button"
+          onClick={onOpenModal}
+          type="button"
+        >
           פתח עדכוני בוקר
         </button>
         <button
           className="news-refresh-button"
           onClick={refreshNews}
           disabled={isRefreshing}
+          type="button"
           title="רענן חדשות"
         >
-          {isRefreshing ? '⟳' : '↻'}
+          {isRefreshing ? '⟳' : 'רענן'}
         </button>
         {status === 'error' && (
-          <button className="news-refresh-button" onClick={retryFetch}>
+          <button
+            className="news-refresh-button"
+            onClick={retryFetch}
+            type="button"
+          >
             נסה שוב
           </button>
         )}

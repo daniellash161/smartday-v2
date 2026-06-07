@@ -169,40 +169,9 @@ export const mockEvents: CalendarEvent[] = [
   },
 ];
 
-export const mockAlerts: Alert[] = [
-  {
-    id: 'a1',
-    title: 'תשלום שכר לימוד עומד לפוג',
-    description: 'נותרו 2 ימים לתשלום לפני הוספת קנס של 150₪',
-    type: 'payment',
-    urgency: 'high',
-    actionLabel: 'לתשלום',
-  },
-  {
-    id: 'a2',
-    title: 'בחינה בשיווק דיגיטלי — עוד 3 ימים',
-    description: 'הבחינה היא בעוד 3 ימים ב-14:00. כדאי להתחיל לחזור על החומר בשיטתיות.',
-    type: 'deadline',
-    urgency: 'high',
-    actionLabel: 'לפתיחת חומרים',
-  },
-  {
-    id: 'a3',
-    title: 'הודעה חדשה מהמרצה',
-    description: 'ד"ר כהן שלח עדכון לגבי מועד ההגשה של עבודת הסמינר',
-    type: 'email',
-    urgency: 'medium',
-    actionLabel: 'לקריאה',
-  },
-  {
-    id: 'a4',
-    title: 'תזכורת: פגישת קבוצה מחר בבוקר',
-    description: 'פגישת קבוצת הלימוד בספרייה ב-09:00',
-    type: 'reminder',
-    urgency: 'low',
-    actionLabel: 'לפרטים',
-  },
-];
+// Alerts are populated from real data sources only (uploads, email, calendar)
+// No fake/demo alerts in mockData
+export const mockAlerts: Alert[] = [];
 
 export const aiDailySummary = `שלום! היום יש לך יום עמוס. בבוקר תתחיל עם פגישת לימוד ב-09:00, הרצאה בניהול מוצר ב-10:00, ובאחר הצהריים משמרת בעבודה מ-16:00.
 חשוב במיוחד: יש לך 2 משימות דחופות — הגשת עבודה סמינריונית בעוד יום וקריאת מאמר לשיעור.
