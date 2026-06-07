@@ -4337,3 +4337,103 @@ select:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(125,183,232,0.1);
 }
+
+/* ---- Quick Insights Widget (Ai Assistant Redesign) ---- */
+.quick-insights-card {
+  direction: rtl;
+  background: #ffffff;
+  border: 1px solid #e7edf4;
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(23, 32, 51, 0.06);
+  overflow: hidden;
+  border-top: 4px solid #3fafa3;
+}
+
+.quick-insights-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eef2f6;
+}
+
+.quick-insights-header div {
+  flex: 1;
+}
+
+.quick-insights-header h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 1.12rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.quick-insights-header p {
+  margin: 6px 0 0;
+  color: #7c8798;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.quick-insights-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
+.quick-insights-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 24px;
+}
+
+.quick-insight-btn {
+  border: 1px solid #dbe5ee;
+  background: #ffffff;
+  color: #172033;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: right;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.quick-insight-btn:hover {
+  background: #f0faf8;
+  border-color: #c0e8e0;
+  color: #247f76;
+}
+
+.quick-insight-btn--active {
+  background: #dff4ec;
+  border-color: #b7e7dc;
+  color: #1f6f66;
+}
+
+.quick-insights-result {
+  margin: 0 24px 22px;
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 16px;
+  padding: 16px;
+  color: #667085;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.quick-insights-empty {
+  margin: 0 24px 22px;
+  background: #f8fbfd;
+  border: 1px solid #e7edf4;
+  border-radius: 16px;
+  padding: 16px;
+  color: #8892a0;
+  text-align: center;
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
