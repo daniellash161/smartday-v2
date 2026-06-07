@@ -96,6 +96,7 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
 
   // Refresh existing news — same function as initial load
   const refreshNews = async () => {
+    console.log('NEWS REFRESH CLICKED');
     if (demoMode) {
       setLastUpdated(new Date().toISOString());
       return;

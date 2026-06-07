@@ -15,7 +15,7 @@ import {
   clearAppleEvents,
 } from '../services/appleCalendarService';
 import { usePersistentState, PREF } from '../utils/userPreferences';
-import SmartTaskSuggestions from './SmartTaskSuggestions';
+import ManualEventModal from './ManualEventModal';
 
 // ---------------------------------------------------------------------------
 // Group definitions
@@ -169,79 +169,102 @@ interface Rec {
 }
 
 function buildRecs(
-  todayEvents: CalendarEvent[],
-  tomorrowEvents: CalendarEvent[],
+  allEvents: CalendarEvent[],
 ): Rec[] {
-  const todayStr    = new Date().toISOString().split('T')[0];
-  const tomorrowStr = new Date(Date.now() + 86_400_000).toISOString().split('T')[0];
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const todayStr = now.toISOString().split('T')[0];
+  const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const sevenDaysStr = sevenDaysLater.toISOString().split('T')[0];
+
+  // Filter events to current week (today through next 7 days)
+  const weekEvents = allEvents.filter(e => {
+    if (!e.date) return false;
+    return e.date >= todayStr && e.date <= sevenDaysStr;
+  });
+
   const recs: Rec[] = [];
+  const processedEventIds = new Set<string>();
 
-  // 1. Work today
-  const workToday = todayEvents.find(e => e.category === 'work');
-  if (workToday) recs.push({
-    id: 'work-today', icon: '💼',
-    title: 'להתכונן למשמרת',
-    reason: `משמרת עבודה היום ב־${workToday.startTime}`,
-    action: 'להכין אוכל לעבודה, בגדים ולבדוק זמן יציאה',
-    taskTitle: 'הכנה למשמרת — אוכל ובגדים',
-    dueDate: todayStr,
+  // Generate recommendations from week events
+  weekEvents.forEach(event => {
+    if (processedEventIds.has(event.id)) return;
+
+    let rec: Rec | null = null;
+
+    // Work events
+    if (event.category === 'work') {
+      rec = {
+        id: `work-${event.id}`,
+        icon: '💼',
+        title: 'להתכונן למשמרת',
+        reason: `משמרת עבודה: ${event.title} ב־${event.startTime}`,
+        action: 'להכין אוכל לעבודה, בגדים ולבדוק זמן יציאה',
+        taskTitle: 'הכנה למשמרת',
+        dueDate: event.date,
+      };
+    }
+
+    // Academic events
+    else if (event.category === 'academic') {
+      rec = {
+        id: `academic-${event.id}`,
+        icon: '📚',
+        title: 'להגיע מוכנ/ה לשיעור',
+        reason: `שיעור: ${event.title} ב־${event.startTime}`,
+        action: 'להכין מחשב / מחברת ולעבור על החומר הקודם',
+        taskTitle: `מעבר על חומר לפני ${event.title}`,
+        dueDate: event.date,
+      };
+    }
+
+    // Exam events
+    else if (event.category === 'exam') {
+      rec = {
+        id: `exam-${event.id}`,
+        icon: '📝',
+        title: 'להתכונן לבחינה',
+        reason: `בחינה: ${event.title} ב־${event.startTime}`,
+        action: 'לפתור מבחן לדוגמה ולהכין ציוד למבחן',
+        taskTitle: `חזרה לבחינה: ${event.title}`,
+        dueDate: event.date,
+      };
+    }
+
+    // Meeting events
+    else if (event.category === 'meeting') {
+      rec = {
+        id: `meeting-${event.id}`,
+        icon: '🤝',
+        title: 'להתכונן לפגישה',
+        reason: `פגישה: ${event.title} ב־${event.startTime}`,
+        action: 'לעבור על נושאי הפגישה ולהכין שאלות',
+        taskTitle: `הכנה לפגישה: ${event.title}`,
+        dueDate: event.date,
+      };
+    }
+
+    // Holiday events
+    else if (event.category === 'holiday') {
+      rec = {
+        id: `holiday-${event.id}`,
+        icon: '🎉',
+        title: 'להתכונן לחג',
+        reason: `חג: ${event.title}`,
+        action: 'לבדוק שעות פתיחה ולהכין מה שצריך',
+        taskTitle: `הכנות לחג: ${event.title}`,
+        dueDate: event.date,
+      };
+    }
+
+    if (rec) {
+      recs.push(rec);
+      processedEventIds.add(event.id);
+    }
   });
 
-  // 2. Academic today
-  const academicToday = todayEvents.find(e => e.category === 'academic');
-  if (academicToday) recs.push({
-    id: 'academic-today', icon: '📚',
-    title: 'להגיע מוכנ/ה להרצאה',
-    reason: `הרצאה היום ב־${academicToday.startTime}`,
-    action: 'להכין מחשב / מחברת ולעבור על החומר הקודם',
-    taskTitle: 'הכנה להרצאה — חומרים וסיכומים',
-    dueDate: todayStr,
-  });
-
-  // 3. Meeting today or tomorrow
-  const meetingToday = todayEvents.find(e => e.category === 'meeting');
-  const meetingTmr   = tomorrowEvents.find(e => e.category === 'meeting');
-  const meetingEv    = meetingToday ?? meetingTmr;
-  if (meetingEv) {
-    const isMtgToday = !!meetingToday;
-    recs.push({
-      id: 'meeting', icon: '🤝',
-      title: 'להתכונן לפגישה',
-      reason: `${meetingEv.title} — ${isMtgToday ? 'היום' : 'מחר'} ב־${meetingEv.startTime}`,
-      action: 'לעבור על נושאי הפגישה ולהכין שאלות',
-      taskTitle: `הכנה לפגישה: ${meetingEv.title}`,
-      dueDate: isMtgToday ? todayStr : tomorrowStr,
-    });
-  }
-
-  // 4. Exam today or tomorrow
-  const examToday = todayEvents.find(e => e.category === 'exam');
-  const examTmr   = tomorrowEvents.find(e => e.category === 'exam');
-  const examEv    = examToday ?? examTmr;
-  if (examEv) {
-    const isExToday = !!examToday;
-    recs.push({
-      id: 'exam', icon: '📝',
-      title: 'לחזור על חומר לבחינה',
-      reason: `${examEv.title} — ${isExToday ? 'היום' : 'מחר'} ב־${examEv.startTime}`,
-      action: 'לפתור מבחן לדוגמה ולהכין ציוד למבחן',
-      taskTitle: `חזרה לבחינה: ${examEv.title}`,
-      dueDate: isExToday ? todayStr : tomorrowStr,
-    });
-  }
-
-  // 5. Holiday tomorrow
-  const holidayTmr = tomorrowEvents.find(e => e.category === 'holiday');
-  if (holidayTmr) recs.push({
-    id: 'holiday-tmr', icon: '🎉',
-    title: 'להתכונן לחג',
-    reason: `מחר: ${holidayTmr.title}`,
-    action: 'לבדוק שעות פתיחה ולהכין מה שצריך',
-    taskTitle: `הכנות לחג: ${holidayTmr.title}`,
-    dueDate: tomorrowStr,
-  });
-
-  return recs.slice(0, 5);
+  return recs.slice(0, 10);
 }
 
 // Single recommendation card
@@ -278,13 +301,33 @@ interface SmartRecsProps {
 const SmartRecommendations = ({
   todayEvents, tomorrowEvents, existingTaskTitles, onAddTasks,
 }: SmartRecsProps) => {
+  // Merge today and tomorrow events for passing to buildRecs
+  const weekEvents = [...todayEvents, ...tomorrowEvents];
+
   const recs = useMemo(
-    () => buildRecs(todayEvents, tomorrowEvents),
-    [todayEvents, tomorrowEvents],
+    () => buildRecs(weekEvents),
+    [weekEvents],
   );
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [showAllRecommendations, setShowAllRecommendations] = useState(false);
 
-  if (recs.length === 0) return null;
+  if (recs.length === 0) {
+    return (
+      <div className="smart-recs">
+        <div className="smart-recs-header">
+          <span className="smart-recs-sparkle">✨</span>
+          <span className="smart-recs-title">המלצות חכמות</span>
+        </div>
+        <div className="smart-recs-empty">אין המלצות חכמות כרגע.</div>
+      </div>
+    );
+  }
+
+  const visibleRecommendations = showAllRecommendations
+    ? recs
+    : recs.slice(0, 2);
+
+  const hiddenCount = recs.length - visibleRecommendations.length;
 
   const handleAdd = (rec: Rec) => {
     onAddTasks([{
@@ -305,7 +348,7 @@ const SmartRecommendations = ({
         <span className="smart-recs-sub">מבוסס על לוח הזמנים שלך</span>
       </div>
       <div className="smart-recs-list">
-        {recs.map(rec => (
+        {visibleRecommendations.map(rec => (
           <RecCard
             key={rec.id}
             rec={rec}
@@ -314,6 +357,17 @@ const SmartRecommendations = ({
           />
         ))}
       </div>
+      {recs.length > 2 && (
+        <button
+          type="button"
+          className="smart-recs-toggle"
+          onClick={() => setShowAllRecommendations(prev => !prev)}
+        >
+          {showAllRecommendations
+            ? 'צמצם המלצות'
+            : `הצג עוד ${hiddenCount} המלצות`}
+        </button>
+      )}
     </div>
   );
 };
@@ -330,6 +384,29 @@ interface EventsCardProps {
   onOpenFutureEvents?: () => void;
 }
 
+// Load manual events from localStorage
+function loadManualEvents(): CalendarEvent[] {
+  try {
+    const stored = localStorage.getItem('smartday-manual-calendar-events');
+    if (stored) {
+      const events = JSON.parse(stored) as CalendarEvent[];
+      return events;
+    }
+  } catch {
+    // Silently fail
+  }
+  return [];
+}
+
+// Save manual events to localStorage
+function saveManualEvents(events: CalendarEvent[]): void {
+  try {
+    localStorage.setItem('smartday-manual-calendar-events', JSON.stringify(events));
+  } catch {
+    // Silently fail
+  }
+}
+
 const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCalendarEventsUpdate, onOpenFutureEvents }: EventsCardProps) => {
   // Calendar source selection with persistence
   const [calendarSource, setCalendarSource] = usePersistentState<'google' | 'apple'>(PREF.CALENDAR_SOURCE, 'google');
@@ -344,6 +421,10 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
   const [appleEvents,  setAppleEvents]  = useState<CalendarEvent[]>(() => loadAppleEvents());
   const [appleError,   setAppleError]   = useState<string | null>(null);
 
+  // Manual events state
+  const [manualEvents, setManualEvents] = useState<CalendarEvent[]>(() => loadManualEvents());
+  const [showManualEventModal, setShowManualEventModal] = useState(false);
+
   const now = new Date();
 
   // Select events based on calendar source
@@ -355,13 +436,10 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
   // Use source events if connected, otherwise show empty state (NOT mockEvents)
   // This prevents demo recommendations from showing when a real source is selected
   const allEvents = useMemo(() => {
-    if (!isSourceConnected) {
-      // No real events from selected source - show only empty state
-      return [];
-    }
-    // Use only real events from selected source
-    return sourceEvents;
-  }, [sourceEvents, isSourceConnected]);
+    const selected = isSourceConnected ? sourceEvents : [];
+    // Always include manual events
+    return [...selected, ...manualEvents];
+  }, [sourceEvents, isSourceConnected, manualEvents]);
 
   // Notify parent about calendar events for alert generation and future view
   useEffect(() => {
@@ -438,6 +516,16 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
     if (calendarSource === 'apple') {
       setCalendarSource('google');
     }
+  };
+
+  const handleAddManualEvent = (eventData: Omit<CalendarEvent, 'id'>) => {
+    const newEvent: CalendarEvent = {
+      ...eventData,
+      id: `manual-${Date.now()}`,
+    };
+    const updated = [...manualEvents, newEvent];
+    setManualEvents(updated);
+    saveManualEvents(updated);
   };
 
   return (
@@ -543,15 +631,36 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
         </>
       )}
 
-      {/* ── Future Calendar Button ── */}
-      {isSourceConnected && allEvents.length > 0 && (
-        <div className="events-future-btn-bar">
+      {/* ── Future Calendar and Add Event Buttons ── */}
+      {isSourceConnected && (
+        <div className="events-future-btn-bar" style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button
             className="events-future-btn"
             onClick={onOpenFutureEvents}
             type="button"
+            style={{ display: allEvents.length > 0 ? 'block' : 'none' }}
           >
             📅 לוח קדימה
+          </button>
+          <button
+            className="events-add-btn"
+            onClick={() => setShowManualEventModal(true)}
+            type="button"
+            style={{
+              border: 'none',
+              borderRadius: '999px',
+              padding: '8px 14px',
+              background: '#ffffff',
+              color: '#3fafa3',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '13px',
+              borderWidth: '1px',
+              borderStyle: 'solid',
+              borderColor: '#3fafa3',
+            }}
+          >
+            + הוסף אירוע
           </button>
         </div>
       )}
@@ -585,12 +694,11 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
         />
       )}
 
-      {/* ── Smart task suggestions (only if source connected) ── */}
-      {isSourceConnected && (
-        <SmartTaskSuggestions
-          calendarEvents={allEvents}
-          existingTaskTitles={existingTaskTitles}
-          onAddTask={task => onAddTasks([task])}
+      {/* ── Manual Event Modal ── */}
+      {showManualEventModal && (
+        <ManualEventModal
+          onClose={() => setShowManualEventModal(false)}
+          onAddEvent={handleAddManualEvent}
         />
       )}
     </div>

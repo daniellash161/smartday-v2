@@ -23,7 +23,9 @@ export function sortByPriority<T extends { priority: Priority }>(items: T[]): T[
 }
 
 export function formatDate(dateStr: string): string {
+  if (!dateStr) return '';
   const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return '';
   return date.toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'numeric' });
 }
 
