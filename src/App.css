@@ -1950,11 +1950,12 @@ textarea {
   box-shadow: 0 4px 12px rgba(125, 183, 232, 0.2);
 }
 
-/* ---- Full Results Section ---- */
+/* ---- Full Results Section (Inside Modal) ---- */
 .pi-results {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
+  width: 100%;
 }
 
 .pi-section {
@@ -2213,8 +2214,8 @@ textarea {
   border-top: 1px solid var(--border);
 }
 
-/* ---- Payments Modal ---- */
-.pm-overlay {
+/* ---- Payments Modal - Single Modal Structure ---- */
+.payments-modal-overlay {
   position: fixed;
   top: 0;
   right: 0;
@@ -2225,42 +2226,38 @@ textarea {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 24px;
+  padding: 32px 24px;
 }
 
-.pm-modal {
-  position: relative;
-  background: #ffffff;
+.payments-modal-panel {
+  width: min(1120px, calc(100vw - 48px));
+  max-height: calc(100vh - 64px);
+  overflow: hidden;
   border-radius: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  width: min(1100px, calc(100vw - 48px));
-  max-height: calc(100vh - 48px);
-  overflow-y: auto;
-  border: 1px solid var(--border);
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgba(23, 32, 51, 0.25);
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--border);
 }
 
-.pm-header {
+.payments-modal-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 28px 28px 20px;
+  padding: 24px 28px;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
-  position: sticky;
-  top: 0;
   background: #ffffff;
-  z-index: 10;
 }
 
-.pm-title-section {
+.payments-modal-title-section {
   flex: 1;
   min-width: 0;
 }
 
-.pm-title {
+.payments-modal-title {
   margin: 0;
   font-size: 22px;
   font-weight: 800;
@@ -2268,15 +2265,15 @@ textarea {
   letter-spacing: -0.3px;
 }
 
-.pm-subtitle {
-  margin: 4px 0 0;
+.payments-modal-subtitle {
+  margin: 6px 0 0;
   font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
+  line-height: 1.4;
 }
 
-.pm-close-btn {
-  position: relative;
+.payments-modal-close {
   background: none;
   border: none;
   font-size: 28px;
@@ -2284,28 +2281,26 @@ textarea {
   cursor: pointer;
   padding: 4px 8px;
   line-height: 1;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
 }
 
-.pm-close-btn:hover {
+.payments-modal-close:hover {
   color: var(--red);
   background: #fce8ed;
 }
 
-.pm-content {
+.payments-modal-content {
   flex: 1;
   overflow-y: auto;
-  padding: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+  padding: 24px 28px;
+  min-width: 0;
 }
 
 /* ---- Important Emails Card - Simple Clean Layout ---- */
