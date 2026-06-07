@@ -10,8 +10,9 @@ const Header = () => {
     <header className="header">
       <div className="header-inner">
         <div className="header-brand">
-          <span className="header-logo">🌅</span>
-          <h1 className="header-title">SmartDay</h1>
+          <h1 className="header-wordmark">
+            <span className="header-wordmark-smart">Smart</span><span className="header-wordmark-day">Day</span>
+          </h1>
           <span className="header-tagline">הלוח החכם שלך</span>
         </div>
         <div className="header-meta">

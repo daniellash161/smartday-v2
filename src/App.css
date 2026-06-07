@@ -100,15 +100,28 @@ textarea {
   gap: 12px;
   flex: 1;
 }
-.header-logo {
-  font-size: 28px;
+.header-wordmark {
+  font-size: 0;
   line-height: 1;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
 }
-.header-title {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
-  color: var(--text);
+.header-wordmark-smart {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #172033;
+  line-height: 1.2;
+}
+.header-wordmark-day {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #3fafa3;
+  line-height: 1.2;
 }
 .header-tagline {
   font-size: 12px;
