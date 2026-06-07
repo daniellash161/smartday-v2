@@ -5794,3 +5794,216 @@ select:focus {
   font-weight: 500;
 }
 
+
+/* =====================================================================
+   THEME TOGGLE & DARK MODE STYLES
+   ===================================================================== */
+
+.header-theme-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.header-theme-toggle:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(125, 183, 232, 0.15);
+}
+
+/* ─────────────────────────────────────────────────────────────────── */
+/* DARK MODE                                                            */
+/* ─────────────────────────────────────────────────────────────────── */
+
+html.dark {
+  --bg: #0f172a;
+  --surface: #172033;
+  --surface2: #1f2937;
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #f8fafc;
+  --text-muted: #cbd5e1;
+  --text-light: #94a3b8;
+}
+
+html.dark body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html.dark .header {
+  background: linear-gradient(180deg, #172033 0%, #1f2937 100%);
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+html.dark .header-wordmark-smart {
+  color: #e0f2fe;
+}
+
+html.dark .header-wordmark-day {
+  color: #3fafa3;
+}
+
+html.dark .header-tagline {
+  background: rgba(63, 175, 163, 0.15);
+  color: #3fafa3;
+}
+
+html.dark .header-date {
+  color: var(--text-muted);
+}
+
+html.dark .header-avatar {
+  background: rgba(117, 99, 208, 0.25);
+  color: #c4b5fd;
+}
+
+html.dark .header-theme-toggle {
+  border-color: var(--border);
+  background: var(--surface2);
+  color: var(--text);
+}
+
+html.dark .card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+html.dark .card-header {
+  background: var(--surface2);
+  border-bottom-color: var(--border);
+}
+
+html.dark .card-title-row {
+  color: var(--text);
+}
+
+html.dark .card-icon,
+html.dark .badge {
+  color: var(--text);
+}
+
+html.dark input,
+html.dark textarea {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html.dark input:focus,
+html.dark textarea:focus {
+  background: var(--surface);
+  border-color: var(--primary);
+}
+
+html.dark button {
+  color: inherit;
+}
+
+html.dark .sched-body,
+html.dark .sched-day-section,
+html.dark .sched-day-header,
+html.dark .sched-day-count,
+html.dark .sched-cat-box,
+html.dark .sched-cat-header,
+html.dark .sched-cat-name,
+html.dark .sched-event-row {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+html.dark .sched-event-title {
+  color: var(--text);
+}
+
+html.dark .sched-event-meta,
+html.dark .sched-event-tags {
+  color: var(--text-muted);
+}
+
+html.dark .sched-cat-icon {
+  opacity: 0.8;
+}
+
+html.dark .news-updates-card,
+html.dark .news-main-item,
+html.dark .news-actions {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html.dark .news-main-item-title {
+  color: var(--text);
+}
+
+html.dark .news-main-item-meta,
+html.dark .news-refresh-button {
+  color: var(--text-muted);
+}
+
+html.dark .task-list-header,
+html.dark .task-item,
+html.dark .task-filters {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html.dark .task-title {
+  color: var(--text);
+}
+
+html.dark .task-meta {
+  color: var(--text-muted);
+}
+
+html.dark .alert-item,
+html.dark .alert-info {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html.dark .alert-title {
+  color: var(--text);
+}
+
+html.dark .alert-desc {
+  color: var(--text-muted);
+}
+
+html.dark .futureCalendarDayCell,
+html.dark .futureCalendarWeekDay,
+html.dark .futureCalendarSelectedDayPanel {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+html.dark .futureCalendarDayNumber,
+html.dark .futureCalendarSelectedDayEventTitle {
+  color: var(--text);
+}
+
+html.dark .futureCalendarDayCell--today {
+  background: rgba(125, 183, 232, 0.12);
+  border-color: #7db7e8;
+}
+
+html.dark .futureCalendarDayCell--selected {
+  background: rgba(63, 175, 163, 0.12);
+  border-color: #3fafa3;
+}
+

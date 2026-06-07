@@ -1,61 +1,7 @@
 import { Task, CalendarEvent, Alert } from '../types';
 
-export const mockTasks: Task[] = [
-  {
-    id: 't1',
-    title: 'הגשת עבודה סמינריונית',
-    description: 'לסיים את הפרק השלישי ולשלוח למנחה',
-    priority: 'high',
-    dueDate: '2026-06-08',
-    completed: false,
-    category: 'אקדמי',
-  },
-  {
-    id: 't2',
-    title: 'תשלום שכר לימוד',
-    description: 'לשלם את המחצית השנייה לפני קנס',
-    priority: 'high',
-    dueDate: '2026-06-09',
-    completed: false,
-    category: 'כספי',
-  },
-  {
-    id: 't3',
-    title: 'קריאת מאמר לשיעור מחר',
-    description: 'מאמר של פורטר על אסטרטגיה תחרותית',
-    priority: 'medium',
-    dueDate: '2026-06-08',
-    completed: false,
-    category: 'אקדמי',
-  },
-  {
-    id: 't4',
-    title: 'הכנת מצגת לעבודת קבוצה',
-    description: 'להכין 8 שקפים עד יום שישי',
-    priority: 'medium',
-    dueDate: '2026-06-12',
-    completed: false,
-    category: 'אקדמי',
-  },
-  {
-    id: 't5',
-    title: 'ענות על אימייל מרצה',
-    description: 'אישור השתתפות בסמינר',
-    priority: 'low',
-    dueDate: '2026-06-10',
-    completed: true,
-    category: 'כללי',
-  },
-  {
-    id: 't6',
-    title: 'עדכון קורות חיים',
-    description: 'להוסיף את ניסיון הסטאז׳ האחרון',
-    priority: 'low',
-    dueDate: '2026-06-15',
-    completed: false,
-    category: 'קריירה',
-  },
-];
+// Demo tasks removed - tasks should only come from user additions, calendar suggestions, emails, or payments
+export const mockTasks: Task[] = [];
 
 export const mockEvents: CalendarEvent[] = [
   // ── היום (2026-06-07) ──────────────────────────────────────
