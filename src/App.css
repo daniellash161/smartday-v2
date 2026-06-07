@@ -2836,7 +2836,7 @@ textarea {
 
 /* ---- Modal adjustments for PaymentsInsightsCard content ---- */
 .paymentDetailsModalBody .pi-results {
-  gap: 32px;
+  gap: 0;
 }
 
 .paymentDetailsModalBody .pi-summary {
@@ -2845,7 +2845,7 @@ textarea {
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(23, 32, 51, 0.04);
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 
 .paymentDetailsModalBody .pi-summary-line {
@@ -2873,7 +2873,11 @@ textarea {
 }
 
 .paymentDetailsModalBody .pi-section {
-  margin-top: 32px;
+  margin-top: 16px;
+}
+
+.paymentDetailsModalBody .pi-section:first-of-type {
+  margin-top: 4px;
 }
 
 .paymentDetailsModalBody .pi-section-title {
