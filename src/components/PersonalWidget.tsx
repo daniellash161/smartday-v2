@@ -3,11 +3,13 @@
  * ─────────────────────────────────────────────────────────────────────────────
  * Allows user to choose between: note, shopping list, drawing, or hidden
  * Persists selections and content to localStorage
+ * Smart shopping list detection based on calendar events
  */
 // @ts-nocheck
 
 import { useState, useEffect, useRef } from 'react';
-import type { Task } from '../types';
+import type { Task, CalendarEvent } from '../types';
+import { mockEvents } from '../data/mockData';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Storage keys
@@ -31,6 +33,7 @@ interface ShoppingItem {
   id: string;
   text: string;
   completed: boolean;
+  createdAt?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -39,13 +42,14 @@ interface ShoppingItem {
 
 interface Props {
   onAddTask?: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  calendarEvents?: CalendarEvent[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PersonalWidget = ({ onAddTask }: Props) => {
+const PersonalWidget = ({ onAddTask, calendarEvents }: Props) => {
   const [widgetType, setWidgetType] = useState<WidgetType>('note');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [noteText, setNoteText] = useState('');
@@ -59,11 +63,12 @@ const PersonalWidget = ({ onAddTask }: Props) => {
   const noteTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Detect shopping events in calendar
-  const detectShoppingEvents = () => {
+  const detectShoppingEvents = (events?: CalendarEvent[]) => {
     try {
-      const manualEvents = localStorage.getItem('smartday-manual-events');
-      if (!manualEvents) return false;
-      const events = JSON.parse(manualEvents);
+      // Use passed calendar events or fallback to mockEvents
+      const eventsToCheck = events || calendarEvents || mockEvents;
+      if (!eventsToCheck || eventsToCheck.length === 0) return false;
+
       const today = new Date().toISOString().split('T')[0];
       const in3Days = new Date();
       in3Days.setDate(in3Days.getDate() + 3);
@@ -72,7 +77,8 @@ const PersonalWidget = ({ onAddTask }: Props) => {
       const ignoredEvents = localStorage.getItem(IGNORED_SHOPPING_EVENTS_KEY);
       const ignoredIds = ignoredEvents ? (JSON.parse(ignoredEvents) as string[]) : [];
 
-      for (const event of events) {
+      for (const event of eventsToCheck) {
+        if (!event.date) continue;
         if (ignoredIds.includes(event.id)) continue;
         if (event.date < today || event.date > cutoff) continue;
 
@@ -101,15 +107,12 @@ const PersonalWidget = ({ onAddTask }: Props) => {
     const savedList = localStorage.getItem(SHOPPING_LIST_KEY);
     if (savedList) {
       try {
-        setShoppingItems(JSON.parse(savedList));
+        const items = JSON.parse(savedList);
+        setShoppingItems(items);
       } catch {
         // ignore parse errors
       }
     }
-
-    // Check for shopping events
-    const hasEvent = detectShoppingEvents();
-    setHasShoppingEvent(hasEvent);
 
     // Load drawing
     if (canvasRef.current) {
@@ -126,6 +129,12 @@ const PersonalWidget = ({ onAddTask }: Props) => {
       }
     }
   }, []);
+
+  // Check for shopping events when calendar events change
+  useEffect(() => {
+    const hasEvent = detectShoppingEvents();
+    setHasShoppingEvent(hasEvent);
+  }, [calendarEvents]);
 
   // Change widget type
   const handleChangeType = (type: WidgetType) => {
@@ -161,6 +170,7 @@ const PersonalWidget = ({ onAddTask }: Props) => {
       id: `item-${Date.now()}`,
       text: newItemText.trim(),
       completed: false,
+      createdAt: new Date().toISOString(),
     };
     const updated = [...shoppingItems, item];
     setShoppingItems(updated);
