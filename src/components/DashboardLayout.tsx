@@ -6,7 +6,9 @@ import EventsCard from './EventsCard';
 import AlertsCard from './AlertsCard';
 import AiAssistant from './AiAssistant';
 import PaymentsModal from './PaymentsModal';
+import NewsModal from './NewsModal';
 import type { Task } from '../types';
+import type { NewsItem } from '../services/newsService';
 import { mockTasks } from '../data/mockData';
 
 // Lazy-load advanced recovered components to avoid type checking conflicts
@@ -19,6 +21,9 @@ const DashboardLayout = () => {
   // Task state lives here so EventsCard suggestions can add to the same list
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+  const [showNewsModal, setShowNewsModal] = useState(false);
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+  const [newsDemoMode, setNewsDemoMode] = useState(false);
 
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
@@ -48,7 +53,12 @@ const DashboardLayout = () => {
 
         <section className="dashboard-full">
           <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
-            <NewsUpdatesCard />
+            <NewsUpdatesCard
+              compact={true}
+              onOpenModal={() => setShowNewsModal(true)}
+              onItemsLoaded={(items) => setNewsItems(items)}
+              demoMode={newsDemoMode}
+            />
           </Suspense>
         </section>
 
@@ -92,6 +102,17 @@ const DashboardLayout = () => {
             />
           </Suspense>
         </PaymentsModal>
+      )}
+
+      {/* News Modal */}
+      {showNewsModal && (
+        <NewsModal
+          items={newsItems}
+          demoMode={newsDemoMode}
+          onAddTask={addTask}
+          existingTaskTitles={existingTaskTitles}
+          onClose={() => setShowNewsModal(false)}
+        />
       )}
     </div>
   );

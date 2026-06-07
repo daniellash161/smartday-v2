@@ -135,101 +135,67 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
   const mainItem = items.find(i => i.importance === 'high') ?? items[0];
   const remainingCount = items.length - 1;
 
+  if (!compact) return null;
+
   return (
-    <div className="card news-card">
+    <div className="news-updates-card">
       {/* Header */}
-      <div className="card-header">
-        <div className="card-title-row">
-          <span className="card-icon">📰</span>
-          <h2 className="card-title">עדכוני בוקר</h2>
+      <div className="news-updates-header">
+        <div>
+          <h3>📰 עדכוני בוקר</h3>
+          <p>מה שחשוב לדעת לפני שמתחילים את היום</p>
         </div>
-        <p className="news-subtitle">מה שחשוב לדעת לפני שמתחילים את היום</p>
       </div>
 
-      {/* ── Compact Mode (main dashboard) ── */}
-      {compact && (
-        <div className="news-compact-view">
-          {status === 'loading' && (
-            <div className="news-state-msg">⏳ טוענים עדכוני בוקר...</div>
-          )}
+      {/* Content */}
+      {status === 'loading' && (
+        <div className="news-empty-state">⏳ טוענים עדכוני בוקר...</div>
+      )}
 
-          {status === 'error' && (
-            <div className="news-state-block">
-              <p>לא הצלחנו למשוך עדכונים כרגע.</p>
-              <div className="news-compact-actions">
-                <button className="news-action-btn" onClick={retryFetch}>נסה שוב</button>
-                <button className="news-action-btn news-action-btn--secondary" onClick={enableDemo}>הפעל הדגמה</button>
-              </div>
-            </div>
-          )}
+      {status === 'error' && items.length === 0 && (
+        <div className="news-error-state">
+          <p>לא הצלחנו למשוך עדכונים כרגע.</p>
+        </div>
+      )}
 
-          {(status === 'success' || status === 'demo') && mainItem && (
-            <div className="news-compact-item">
-              {mainItem.importance === 'high' && (
-                <span className="news-importance-badge">חשוב להיום</span>
-              )}
-              <p className="news-compact-title">{mainItem.title}</p>
-              <div className="news-compact-footer">
-                <span className="news-compact-source">{mainItem.source}</span>
-                <span className="news-compact-time">{fmtRelative(mainItem.publishedAt)}</span>
-              </div>
-              {remainingCount > 0 && (
-                <p className="news-compact-remaining">עוד {remainingCount} עדכונים זמינים</p>
-              )}
-            </div>
-          )}
+      {items.length === 0 && status !== 'loading' && status !== 'error' && (
+        <div className="news-empty-state">אין עדכונים חשובים כרגע.</div>
+      )}
 
-          {/* Refresh error message */}
-          {refreshError && (
-            <p className="news-refresh-error">{refreshError}</p>
-          )}
-
-          {/* Last updated time */}
-          {(status === 'success' || status === 'demo' || status === 'error') && (
-            <p className="news-last-updated">עודכן לאחרונה: {fmtTime(lastUpdated)}</p>
-          )}
-
-          {/* Buttons row */}
-          {(status === 'success' || status === 'demo' || status === 'error') && (
-            <div className="news-compact-buttons">
-              <button className="news-open-btn" onClick={onOpenModal}>
-                פתח עדכוני בוקר
-              </button>
-              <button
-                className="news-refresh-btn"
-                onClick={refreshNews}
-                disabled={isRefreshing}
-                title="רענן חדשות"
-              >
-                {isRefreshing ? '⟳' : '↻'}
-              </button>
-            </div>
+      {mainItem && (
+        <div className="news-main-item">
+          <p className="news-main-item-title">{mainItem.title}</p>
+          <div className="news-main-item-meta">
+            <span>{mainItem.source}</span>
+            <span>{fmtRelative(mainItem.publishedAt)}</span>
+          </div>
+          {remainingCount > 0 && (
+            <p style={{ marginTop: '8px', color: '#7c8798', fontSize: '0.9rem' }}>
+              עוד {remainingCount} עדכונים זמינים
+            </p>
           )}
         </div>
       )}
 
-      {/* ── Full Mode (for modal, if ever needed) ── */}
-      {!compact && (
-        <div className="news-full-view">
-          {status === 'loading' && (
-            <div className="news-state-msg">⏳ טוענים עדכוני בוקר...</div>
-          )}
-
-          {status === 'error' && (
-            <div className="news-state-block">
-              <p>לא הצלחנו למשוך עדכונים כרגע.</p>
-              <div className="news-compact-actions">
-                <button className="news-action-btn" onClick={retryFetch}>נסה שוב</button>
-                <button className="news-action-btn news-action-btn--secondary" onClick={enableDemo}>הפעל הדגמה</button>
-              </div>
-            </div>
-          )}
-
-          {(status === 'success' || status === 'demo') && (
-            <p className="news-state-msg">{items.length} עדכונים זמינים</p>
-          )}
-        </div>
-      )}
+      {/* Actions */}
+      <div className="news-actions">
+        <button className="news-open-button" onClick={onOpenModal}>
+          פתח עדכוני בוקר
+        </button>
+        <button
+          className="news-refresh-button"
+          onClick={refreshNews}
+          disabled={isRefreshing}
+          title="רענן חדשות"
+        >
+          {isRefreshing ? '⟳' : '↻'}
+        </button>
+        {status === 'error' && (
+          <button className="news-refresh-button" onClick={retryFetch}>
+            נסה שוב
+          </button>
+        )}
+      </div>
     </div>
   );
 };
