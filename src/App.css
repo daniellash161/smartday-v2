@@ -1953,6 +1953,130 @@ textarea {
   font-size: 0.85rem;
 }
 
+/* ---- Morning News Modal (New isolated classes) ---- */
+
+.morningNewsModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+.morningNewsModalPanel {
+  width: min(860px, calc(100vw - 64px));
+  max-height: calc(100vh - 64px);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 24px 80px rgba(23, 32, 51, 0.28);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+  z-index: 100000;
+}
+
+.morningNewsModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 28px;
+  background: #f4f9ff;
+  border-bottom: 1px solid #eef2f6;
+  flex-shrink: 0;
+}
+
+.morningNewsModalHeader h2 {
+  margin: 0;
+  color: #172033;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.morningNewsModalHeader p {
+  margin: 6px 0 0;
+  color: #7c8798;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.morningNewsModalClose {
+  border: none;
+  background: #ffffff;
+  color: #667085;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 1.4rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(23, 32, 51, 0.08);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.morningNewsModalClose:hover {
+  background: #f0f7fc;
+  color: #172033;
+  box-shadow: 0 6px 16px rgba(23, 32, 51, 0.12);
+}
+
+.morningNewsModalBody {
+  padding: 24px 28px 28px;
+  overflow-y: auto;
+  background: #ffffff;
+  flex: 1 1 auto;
+}
+
+.morningNewsItem {
+  border: 1px solid #e7edf4;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  background: #ffffff;
+  box-shadow: 0 6px 16px rgba(23, 32, 51, 0.04);
+}
+
+.morningNewsItem:last-child {
+  margin-bottom: 0;
+}
+
+.morningNewsItemTitle {
+  color: #172033;
+  font-weight: 800;
+  line-height: 1.45;
+  margin: 0 0 6px;
+  font-size: 1.01rem;
+}
+
+.morningNewsItemMeta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  color: #7c8798;
+}
+
+.morningNewsEmpty {
+  text-align: center;
+  color: #7c8798;
+  padding: 32px 16px;
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
 /* ---- Payments Card ---- */
 .payments-card,
 .payments-insights-card {

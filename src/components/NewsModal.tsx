@@ -1,8 +1,8 @@
 /**
- * NewsModal — Full width modal showing all morning news updates
+ * NewsModal — Morning news updates modal
  * ─────────────────────────────────────────────────────────────────────────────
  * Opens when user clicks "פתח עדכוני בוקר" from the dashboard card.
- * Displays full list of news items with categories.
+ * Displays full list of news items in a centered modal.
  */
 
 import type { NewsItem } from '../services/newsService';
@@ -29,17 +29,17 @@ function fmtRelative(iso: string): string {
 
 const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
   return (
-    <div className="news-modal-overlay" onClick={onClose}>
-      <div className="news-modal-panel" onClick={(e) => e.stopPropagation()}>
-        <header className="news-modal-header">
+    <div className="morningNewsModalOverlay" role="dialog" aria-modal="true" dir="rtl" onClick={onClose}>
+      <div className="morningNewsModalPanel" onClick={(e) => e.stopPropagation()}>
+        <header className="morningNewsModalHeader">
           <div>
-            <h2>📰 עדכוני בוקר</h2>
+            <h2>עדכוני בוקר</h2>
             <p>חדשות ועדכונים חשובים שיכולים להשפיע על היום שלך</p>
           </div>
           <button
-            className="news-modal-close"
-            onClick={onClose}
             type="button"
+            className="morningNewsModalClose"
+            onClick={onClose}
             aria-label="סגור"
             title="סגור"
           >
@@ -47,32 +47,34 @@ const NewsModal = ({ items, demoMode, onClose }: NewsModalProps) => {
           </button>
         </header>
 
-        <div className="news-modal-body">
+        <main className="morningNewsModalBody">
           {items.length === 0 ? (
-            <div className="news-modal-empty">אין עדכונים חשובים כרגע.</div>
+            <div className="morningNewsEmpty">אין עדכונים חשובים כרגע.</div>
           ) : (
-            <div className="news-modal-items">
+            <div>
               {items.map((item) => (
-                <div key={item.id} className="news-modal-item">
-                  <h3 className="news-modal-item-title">{item.title}</h3>
-                  <div className="news-modal-item-meta">
-                    <span className="news-modal-item-source">{item.source}</span>
+                <div key={item.id} className="morningNewsItem">
+                  <h3 className="morningNewsItemTitle">{item.title}</h3>
+                  <div className="morningNewsItemMeta">
+                    <span>{item.source}</span>
                     {item.importance === 'high' && (
-                      <span className="news-importance-badge">חשוב להיום</span>
+                      <span style={{ color: '#c0645a', fontWeight: 700 }}>דחוף</span>
                     )}
                     {demoMode && item.isDemo && (
-                      <span className="news-demo-badge">נתוני דוגמה</span>
+                      <span style={{ color: '#667085', fontWeight: 600 }}>נתוני דוגמה</span>
                     )}
-                    <span className="news-modal-item-time">{fmtRelative(item.publishedAt)}</span>
+                    <span style={{ color: '#a0aab5', fontSize: '0.8rem' }}>{fmtRelative(item.publishedAt)}</span>
                   </div>
                   {item.summary && (
-                    <p className="news-modal-item-summary">{item.summary}</p>
+                    <p style={{ marginTop: '8px', color: '#667085', fontSize: '0.92rem', lineHeight: 1.5 }}>
+                      {item.summary}
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
