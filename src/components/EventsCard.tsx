@@ -8,6 +8,13 @@ import {
   disconnectGoogleCalendar,
   fetchGoogleCalendarEvents,
 } from '../services/googleCalendarService';
+import {
+  parseICSText,
+  loadAppleEvents,
+  saveAppleEvents,
+  clearAppleEvents,
+} from '../services/appleCalendarService';
+import { usePersistentState, PREF } from '../utils/userPreferences';
 
 // ---------------------------------------------------------------------------
 // Group definitions
@@ -318,22 +325,35 @@ interface EventsCardProps {
   events?: CalendarEvent[];
   onAddTasks: (tasks: Omit<Task, 'id'>[]) => void;
   existingTaskTitles: Set<string>;
+  onShowFutureEvents?: () => void;
 }
 
-const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: EventsCardProps) => {
+const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onShowFutureEvents }: EventsCardProps) => {
+  // Calendar source selection with persistence
+  const [calendarSource, setCalendarSource] = usePersistentState<'google' | 'apple'>(PREF.CALENDAR_SOURCE, 'google');
+
+  // Google Calendar state
   const [gcalEvents,   setGcalEvents]   = useState<CalendarEvent[]>([]);
   const [isConnected,  setIsConnected]  = useState(false);
   const [isLoading,    setIsLoading]    = useState(false);
   const [gcalError,    setGcalError]    = useState<string | null>(null);
+
+  // Apple Calendar state
+  const [appleEvents,  setAppleEvents]  = useState<CalendarEvent[]>(() => loadAppleEvents());
+  const [appleError,   setAppleError]   = useState<string | null>(null);
+
   const now = new Date();
 
-  // Merge mock events + Google events; deduplicate by id (Google wins on conflict)
+  // Select events based on calendar source
+  const sourceEvents = calendarSource === 'google' ? gcalEvents : appleEvents;
+
+  // Merge mock events + selected source events; deduplicate by id
   const allEvents = useMemo(() => {
     const map = new Map<string, CalendarEvent>();
     events.forEach(e => map.set(e.id, e));
-    gcalEvents.forEach(e => map.set(e.id, e));
+    sourceEvents.forEach(e => map.set(e.id, e));
     return Array.from(map.values());
-  }, [events, gcalEvents]);
+  }, [events, sourceEvents]);
 
   const sorted = [...allEvents].sort(
     (a, b) =>
@@ -371,6 +391,42 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
     setGcalError(null);
   };
 
+  const handleAppleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setAppleError(null);
+    try {
+      const allImportedEvents: CalendarEvent[] = [];
+
+      for (const file of files) {
+        const text = await file.text();
+        const parsed = parseICSText(text, file.name.replace('.ics', ''));
+        allImportedEvents.push(...parsed);
+      }
+
+      // Remove duplicates by ID
+      const uniqueMap = new Map<string, CalendarEvent>();
+      allImportedEvents.forEach(e => uniqueMap.set(e.id, e));
+      const uniqueEvents = Array.from(uniqueMap.values());
+
+      saveAppleEvents(uniqueEvents);
+      setAppleEvents(uniqueEvents);
+      setCalendarSource('apple');
+    } catch (err) {
+      setAppleError(err instanceof Error ? err.message : 'לא הצלחנו לקרוא את קובץ Apple Calendar. ודאי שזה קובץ ICS תקין.');
+    }
+  };
+
+  const handleClearApple = () => {
+    clearAppleEvents();
+    setAppleEvents([]);
+    setAppleError(null);
+    if (calendarSource === 'apple') {
+      setCalendarSource('google');
+    }
+  };
+
   return (
     <div className="card">
       {/* ── Header ── */}
@@ -383,34 +439,95 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles }: Eve
         <p className="events-card-subtitle">האירועים החשובים שלך להיום ולמחר</p>
       </div>
 
-      {/* ── Google Calendar bar ── */}
-      <div className="events-connection-bar">
-        <div className="events-connection-status">
-          <span className={`events-connection-dot ${isConnected ? 'connected' : 'disconnected'}`} />
-          <span className="events-connection-text">
-            {isConnected ? 'מחובר ל־Google Calendar' : 'לא מחובר ל־Google Calendar'}
-          </span>
-        </div>
-        {isConnected ? (
-          <button className="events-gcal-btn events-gcal-btn--disconnect" onClick={handleDisconnect}>
-            התנתק
-          </button>
-        ) : (
+      {/* ── Calendar Source Selector ── */}
+      <div className="events-source-selector">
+        <div className="events-source-pills">
           <button
-            className="events-gcal-btn"
-            onClick={handleConnect}
-            disabled={isLoading}
+            className={`events-source-pill ${calendarSource === 'google' ? 'active' : ''}`}
+            onClick={() => setCalendarSource('google')}
+            type="button"
           >
-            {isLoading ? 'מתחבר...' : 'התחברות ל־Google Calendar'}
+            Google Calendar
           </button>
-        )}
+          <button
+            className={`events-source-pill ${calendarSource === 'apple' ? 'active' : ''}`}
+            onClick={() => setCalendarSource('apple')}
+            type="button"
+          >
+            Apple Calendar
+          </button>
+        </div>
       </div>
 
-      {gcalError && (
-        <div className="events-gcal-msg events-gcal-msg--error">
-          <span>⚠️ {gcalError}</span>
-          <button className="events-gcal-msg-close" onClick={() => setGcalError(null)} aria-label="סגור">✕</button>
-        </div>
+      {/* ── Google Calendar Connection ── */}
+      {calendarSource === 'google' && (
+        <>
+          <div className="events-connection-bar">
+            <div className="events-connection-status">
+              <span className={`events-connection-dot ${isConnected ? 'connected' : 'disconnected'}`} />
+              <span className="events-connection-text">
+                {isConnected ? 'מחובר ל־Google Calendar' : 'לא מחובר ל־Google Calendar'}
+              </span>
+            </div>
+            {isConnected ? (
+              <button className="events-gcal-btn events-gcal-btn--disconnect" onClick={handleDisconnect} type="button">
+                התנתק
+              </button>
+            ) : (
+              <button
+                className="events-gcal-btn"
+                onClick={handleConnect}
+                disabled={isLoading}
+                type="button"
+              >
+                {isLoading ? 'מתחבר...' : 'התחברות ל־Google Calendar'}
+              </button>
+            )}
+          </div>
+
+          {gcalError && (
+            <div className="events-gcal-msg events-gcal-msg--error">
+              <span>⚠️ {gcalError}</span>
+              <button className="events-gcal-msg-close" onClick={() => setGcalError(null)} aria-label="סגור" type="button">✕</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Apple Calendar Import ── */}
+      {calendarSource === 'apple' && (
+        <>
+          <div className="events-connection-bar">
+            <div className="events-connection-status">
+              <span className={`events-connection-dot ${appleEvents.length > 0 ? 'connected' : 'disconnected'}`} />
+              <span className="events-connection-text">
+                {appleEvents.length > 0 ? `${appleEvents.length} אירועים מיובאים` : 'לא יובאו לוחות Apple Calendar'}
+              </span>
+            </div>
+            <label className="events-apple-import">
+              <input
+                type="file"
+                multiple
+                accept=".ics,text/calendar"
+                onChange={handleAppleImport}
+                style={{ display: 'none' }}
+              />
+              <span className="events-gcal-btn">ייבוא Apple Calendar</span>
+            </label>
+            {appleEvents.length > 0 && (
+              <button className="events-gcal-btn events-gcal-btn--disconnect" onClick={handleClearApple} type="button">
+                ניקוי
+              </button>
+            )}
+          </div>
+
+          {appleError && (
+            <div className="events-gcal-msg events-gcal-msg--error">
+              <span>⚠️ {appleError}</span>
+              <button className="events-gcal-msg-close" onClick={() => setAppleError(null)} aria-label="סגור" type="button">✕</button>
+            </div>
+          )}
+        </>
       )}
 
       {/* ── Day sections ── */}

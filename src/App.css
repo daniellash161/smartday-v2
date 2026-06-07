@@ -918,6 +918,58 @@ textarea {
 }
 .events-gcal-msg-close:hover { color: var(--text); }
 
+/* Calendar Source Selector */
+.events-source-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 26px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+
+.events-source-pills {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.events-source-pill {
+  padding: 8px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.events-source-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.events-source-pill.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+}
+
+/* Apple Calendar Import Label (styled as button) */
+.events-apple-import {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.events-apple-import .events-gcal-btn {
+  cursor: pointer;
+}
+
 /* Empty state override for events */
 .events-empty-state { padding: 28px 20px; }
 
