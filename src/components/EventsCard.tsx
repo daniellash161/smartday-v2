@@ -187,6 +187,14 @@ function buildRecs(
   const recs: Rec[] = [];
   const processedEventIds = new Set<string>();
 
+  // Helper to format time for display
+  const formatTimeForDisplay = (startTime: string): string => {
+    if (!startTime || startTime === '00:00' || startTime === '') {
+      return 'כל היום';
+    }
+    return `ב־${startTime}`;
+  };
+
   // Generate recommendations from week events
   weekEvents.forEach(event => {
     if (processedEventIds.has(event.id)) return;
@@ -199,7 +207,7 @@ function buildRecs(
         id: `work-${event.id}`,
         icon: '💼',
         title: 'להתכונן למשמרת',
-        reason: `משמרת עבודה: ${event.title} ב־${event.startTime}`,
+        reason: `משמרת עבודה: ${event.title} ${formatTimeForDisplay(event.startTime)}`,
         action: 'להכין אוכל לעבודה, בגדים ולבדוק זמן יציאה',
         taskTitle: 'הכנה למשמרת',
         dueDate: event.date,
@@ -212,7 +220,7 @@ function buildRecs(
         id: `academic-${event.id}`,
         icon: '📚',
         title: 'להגיע מוכנ/ה לשיעור',
-        reason: `שיעור: ${event.title} ב־${event.startTime}`,
+        reason: `שיעור: ${event.title} ${formatTimeForDisplay(event.startTime)}`,
         action: 'להכין מחשב / מחברת ולעבור על החומר הקודם',
         taskTitle: `מעבר על חומר לפני ${event.title}`,
         dueDate: event.date,
@@ -225,7 +233,7 @@ function buildRecs(
         id: `exam-${event.id}`,
         icon: '📝',
         title: 'להתכונן לבחינה',
-        reason: `בחינה: ${event.title} ב־${event.startTime}`,
+        reason: `בחינה: ${event.title} ${formatTimeForDisplay(event.startTime)}`,
         action: 'לפתור מבחן לדוגמה ולהכין ציוד למבחן',
         taskTitle: `חזרה לבחינה: ${event.title}`,
         dueDate: event.date,
@@ -238,7 +246,7 @@ function buildRecs(
         id: `meeting-${event.id}`,
         icon: '🤝',
         title: 'להתכונן לפגישה',
-        reason: `פגישה: ${event.title} ב־${event.startTime}`,
+        reason: `פגישה: ${event.title} ${formatTimeForDisplay(event.startTime)}`,
         action: 'לעבור על נושאי הפגישה ולהכין שאלות',
         taskTitle: `הכנה לפגישה: ${event.title}`,
         dueDate: event.date,
@@ -634,7 +642,6 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
             className="events-future-btn"
             onClick={onOpenFutureEvents}
             type="button"
-            style={{ display: allEvents.length > 0 ? 'block' : 'none' }}
           >
             📅 לוח קדימה
           </button>

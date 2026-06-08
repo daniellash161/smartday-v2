@@ -310,7 +310,7 @@ const PersonalWidget = ({ onAddTask, calendarEvents }: Props) => {
               onClick={handleToggleCollapsed}
               title="כווץ"
             >
-              −
+              כווץ
             </button>
           </div>
           <p className="personal-subtitle-expanded">פתק, קניות או ציור קטן ליום שלך</p>

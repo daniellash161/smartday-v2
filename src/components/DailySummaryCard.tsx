@@ -38,7 +38,7 @@ const DailySummaryCard = ({ tasks, calendarEvents, newsCount }: DailySummaryCard
   const generateSummary = (): string => {
     // If no data at all
     if (stats.todayEvents === 0 && stats.urgentTasks === 0 && newsCount === 0) {
-      return 'עדיין אין מספיק מידע כדי לבנות סיכום יומי מלא. חברי לוח שנה, משימות או מיילים כדי לקבל סיכום חכם.';
+      return 'יש לך היום כמה עדכונים זמינים. חברי לוח שנה, משימות ומיילים כדי לקבל סיכום יומי מלא יותר.';
     }
 
     const parts: string[] = [];
