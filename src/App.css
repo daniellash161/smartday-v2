@@ -8010,3 +8010,14 @@ html.dark .ds2-task-row { background: var(--card-secondary); }
 
 html.dark .qi-item { background: var(--card-secondary); }
 html.dark .qi-badge--date { background: var(--surface2); border-color: var(--border); }
+
+/* Quick insights — wisdom text */
+.qi-wisdom { padding: 4px 0 0; }
+.qi-wisdom-text {
+  font-size: .95rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.65;
+  margin: 0;
+  letter-spacing: -.01em;
+}
