@@ -102,6 +102,16 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
             {isConnected && visibleEmails.length > 0 && (
               <span className="badge badge-red">{visibleEmails.length}</span>
             )}
+            {isConnected && (
+              <button
+                className="email-sync-btn"
+                onClick={_doFetch}
+                disabled={isLoading}
+                title="משוך מיילים חדשים"
+              >
+                {isLoading ? '⏳' : '🔄'}
+              </button>
+            )}
           </div>
         </div>
 
