@@ -8042,3 +8042,86 @@ html.dark .ds2-context-banner {
   background: linear-gradient(135deg, #1a2b32 0%, #1e2d3e 100%);
   border-color: var(--border);
 }
+
+/* ─── Task inline edit row ─────────────────────────────────────────────────── */
+.tl-edit-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--surface2);
+}
+
+.tl-edit-title {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius-sm);
+  font-size: .92rem;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.tl-edit-title:focus { outline: none; }
+
+.tl-edit-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tl-edit-date,
+.tl-edit-priority {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: .82rem;
+  color: var(--text);
+  background: var(--surface);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.tl-edit-save {
+  padding: 5px 16px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.tl-edit-cancel {
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .82rem;
+  cursor: pointer;
+}
+
+/* Edit/delete action buttons */
+.tl-task-action {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .85rem;
+  padding: 2px 4px;
+  opacity: 0;
+  transition: opacity .15s;
+  line-height: 1;
+}
+.tl-task-item:hover .tl-task-action { opacity: .65; }
+.tl-task-action:hover { opacity: 1 !important; }
+
+html.dark .tl-edit-row { background: var(--card-secondary); }
+html.dark .tl-edit-title,
+html.dark .tl-edit-date,
+html.dark .tl-edit-priority { background: var(--card); border-color: var(--border); color: var(--text); }
+html.dark .tl-edit-title { border-color: var(--primary); }

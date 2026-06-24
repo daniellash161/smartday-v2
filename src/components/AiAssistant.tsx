@@ -57,7 +57,11 @@ function findMainFocus(tasks: Task[], calendarEvents: CalendarEvent[]) {
   const DEADLINE_RE = /הגשה|דדליין|deadline/i;
 
   const upcomingImportant = calendarEvents
-    .filter(e => e.source !== 'demo' && e.date >= today)
+    .filter(e =>
+      e.source !== 'demo' &&
+      e.date >= today &&
+      !e.description?.includes('לוז למידה')
+    )
     .map(e => ({ ...e, days: daysUntil(e.date) }))
     .filter(e => e.days <= 14)
     .sort((a, b) => a.days - b.days);

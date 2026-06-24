@@ -61,7 +61,11 @@ const DailySummaryCard = ({ tasks, calendarEvents }: DailySummaryCardProps) => {
 
     // Smart context: scan next 14 days for exams / interviews / deadlines
     const upcoming = calendarEvents
-      .filter(e => e.source !== 'demo' && e.date >= todayStr)
+      .filter(e =>
+        e.source !== 'demo' &&
+        e.date >= todayStr &&
+        !e.description?.includes('לוז למידה')  // exclude study-plan tasks added to calendar
+      )
       .map(e => ({ ...e, days: daysUntil(e.date) }))
       .filter(e => e.days >= 0 && e.days <= 14)
       .sort((a, b) => a.days - b.days);

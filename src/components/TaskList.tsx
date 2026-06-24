@@ -3,10 +3,83 @@ import type { Task } from '../types';
 import { sortByPriority, priorityLabel, priorityColor, formatDate, isToday, isTomorrow } from '../utils/priority';
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Inline Edit Row
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface EditRowProps {
+  task: Task;
+  onSave: (id: string, patch: Partial<Task>) => void;
+  onCancel: () => void;
+}
+
+const PRIORITY_OPTIONS: { value: Task['priority']; label: string }[] = [
+  { value: 'high',   label: 'דחוף' },
+  { value: 'medium', label: 'בינוני' },
+  { value: 'low',    label: 'רגיל' },
+];
+
+const EditRow = ({ task, onSave, onCancel }: EditRowProps) => {
+  const [title,    setTitle]    = useState(task.title);
+  const [dueDate,  setDueDate]  = useState(task.dueDate ?? task.deadlineDate ?? '');
+  const [priority, setPriority] = useState<Task['priority']>(task.priority ?? 'medium');
+
+  const handleSave = () => {
+    if (!title.trim()) return;
+    onSave(task.id, {
+      title: title.trim(),
+      dueDate,
+      deadlineDate: dueDate,
+      priority,
+      urgency: priority as any,
+    });
+  };
+
+  return (
+    <div className="tl-edit-row">
+      <input
+        className="tl-edit-title"
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') onCancel(); }}
+        autoFocus
+        placeholder="שם המשימה"
+      />
+      <div className="tl-edit-meta">
+        <input
+          type="date"
+          className="tl-edit-date"
+          value={dueDate}
+          onChange={e => setDueDate(e.target.value)}
+        />
+        <select
+          className="tl-edit-priority"
+          value={priority}
+          onChange={e => setPriority(e.target.value as Task['priority'])}
+        >
+          {PRIORITY_OPTIONS.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <button className="tl-edit-save" onClick={handleSave}>שמור</button>
+        <button className="tl-edit-cancel" onClick={onCancel}>ביטול</button>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Task Item Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TaskItem = ({ task, onToggle, onDelete }: { task: Task; onToggle: (id: string) => void; onDelete: (id: string) => void }) => {
+interface TaskItemProps {
+  task: Task;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onEdit:   (id: string, patch: Partial<Task>) => void;
+}
+
+const TaskItem = ({ task, onToggle, onDelete, onEdit }: TaskItemProps) => {
+  const [editing, setEditing] = useState(false);
   const color = priorityColor[task.priority];
   const label = priorityLabel[task.priority];
 
@@ -16,23 +89,30 @@ const TaskItem = ({ task, onToggle, onDelete }: { task: Task; onToggle: (id: str
     ? 'מחר'
     : formatDate(task.dueDate);
 
+  if (editing) {
+    return (
+      <EditRow
+        task={task}
+        onSave={(id, patch) => { onEdit(id, patch); setEditing(false); }}
+        onCancel={() => setEditing(false)}
+      />
+    );
+  }
+
   return (
     <div className={`tl-task-item ${task.completed ? 'tl-task-done' : ''}`}>
       <button
         className={`tl-task-checkbox ${task.completed ? 'tl-checked' : ''}`}
         onClick={() => onToggle(task.id)}
         aria-label="סמן כבוצע"
-        title={task.completed ? 'בוצע' : 'לא בוצע'}
       >
         {task.completed ? '✓' : ''}
       </button>
 
       <div className="tl-task-content">
-        <div className="tl-task-title-row">
-          <span className={`tl-task-title ${task.completed ? 'tl-task-title-done' : ''}`}>
-            {task.title}
-          </span>
-        </div>
+        <span className={`tl-task-title ${task.completed ? 'tl-task-title-done' : ''}`}>
+          {task.title}
+        </span>
         {task.description && <p className="tl-task-desc">{task.description}</p>}
       </div>
 
@@ -40,14 +120,21 @@ const TaskItem = ({ task, onToggle, onDelete }: { task: Task; onToggle: (id: str
         <span className="tl-task-priority" style={{ background: color + '22', color }}>
           {label}
         </span>
-        <span className="tl-task-category">{task.category}</span>
         <span className="tl-task-date">{dueDateLabel}</span>
+        {!task.completed && (
+          <button
+            className="tl-task-action tl-task-edit"
+            onClick={() => setEditing(true)}
+            title="ערוך"
+          >
+            ✏️
+          </button>
+        )}
         {task.completed && (
           <button
-            className="tl-task-delete"
+            className="tl-task-action tl-task-delete"
             onClick={() => onDelete(task.id)}
-            title="מחק משימה"
-            aria-label="מחק"
+            title="מחק"
           >
             🗑️
           </button>
@@ -65,54 +152,35 @@ interface TaskListProps {
   tasks: Task[];
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onEdit:   (id: string, patch: Partial<Task>) => void;
 }
 
-type FilterType = 'all' | 'today' | 'urgent' | 'in-progress' | 'done' | 'smart';
+type FilterType = 'all' | 'today' | 'urgent' | 'in-progress' | 'done';
 
-const TaskList = ({ tasks, onToggle, onDelete }: TaskListProps) => {
+const TaskList = ({ tasks, onToggle, onDelete, onEdit }: TaskListProps) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
-  const allCount = tasks.length;
-  const urgentCount = tasks.filter((t) =>
-    !t.completed && (
-      t.priority === 'high' ||
-      t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical'
-    )
+  const urgentCount = tasks.filter(t =>
+    !t.completed && (t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical')
   ).length;
-  const todayCount = tasks.filter((t) =>
+  const todayCount = tasks.filter(t =>
     !t.completed && (isToday(t.dueDate) || isToday(t.deadlineDate ?? ''))
   ).length;
-  const doneCount = tasks.filter((t) => t.completed || t.status === 'done').length;
+  const doneCount = tasks.filter(t => t.completed || t.status === 'done').length;
 
-  // Filter tasks based on selection
-  const getFilteredTasks = () => {
-    let filtered = tasks;
-
-    if (selectedFilter === 'today') {
-      filtered = tasks.filter((t) => isToday(t.dueDate) && !t.completed);
-    } else if (selectedFilter === 'urgent') {
-      filtered = tasks.filter((t) => t.priority === 'high' && !t.completed);
-    } else if (selectedFilter === 'in-progress') {
-      filtered = tasks.filter((t) => !t.completed);
-    } else if (selectedFilter === 'done') {
-      filtered = tasks.filter((t) => t.completed);
-    } else if (selectedFilter === 'smart') {
-      // Smart suggestions: high priority or due today
-      filtered = tasks.filter((t) => (t.priority === 'high' || isToday(t.dueDate)) && !t.completed);
-    }
-
-    return sortByPriority(filtered);
+  const getBase = (): Task[] => {
+    if (selectedFilter === 'today')       return tasks.filter(t => !t.completed && (isToday(t.dueDate) || isToday(t.deadlineDate ?? '')));
+    if (selectedFilter === 'urgent')      return tasks.filter(t => !t.completed && (t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent'));
+    if (selectedFilter === 'in-progress') return tasks.filter(t => !t.completed);
+    if (selectedFilter === 'done')        return tasks.filter(t => t.completed);
+    return tasks;
   };
-
-  const filteredTasks = getFilteredTasks();
+  const filteredTasks = sortByPriority(getBase());
 
   return (
     <div className="tl-card">
       {/* Header */}
       <div className="tl-header">
-        <button className="tl-add-btn" title="הוסף משימה חדשה">
-          + הוסף משימה
-        </button>
         <div className="tl-header-content">
           <h2 className="tl-title">משימות ✅</h2>
           <p className="tl-subtitle">המשימות שלך מסודרות לפי דחיפות ודדליין</p>
@@ -122,7 +190,7 @@ const TaskList = ({ tasks, onToggle, onDelete }: TaskListProps) => {
       {/* Summary Strip */}
       <div className="tl-summary-strip">
         <div className="tl-stat-col tl-stat-total">
-          <span className="tl-stat-number">{allCount}</span>
+          <span className="tl-stat-number">{tasks.length}</span>
           <span className="tl-stat-label">סה״כ</span>
         </div>
         <div className="tl-stat-col tl-stat-urgent">
@@ -141,42 +209,21 @@ const TaskList = ({ tasks, onToggle, onDelete }: TaskListProps) => {
 
       {/* Filter Chips */}
       <div className="tl-filters">
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'all' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('all')}
-        >
-          הכל
-        </button>
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'today' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('today')}
-        >
-          היום
-        </button>
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'urgent' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('urgent')}
-        >
-          דחופות
-        </button>
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'in-progress' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('in-progress')}
-        >
-          בתהליך
-        </button>
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'done' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('done')}
-        >
-          הושלמו
-        </button>
-        <button
-          className={`tl-filter-chip ${selectedFilter === 'smart' ? 'tl-filter-active' : ''}`}
-          onClick={() => setSelectedFilter('smart')}
-        >
-          המלצות חכמות
-        </button>
+        {([
+          ['all', 'הכל'],
+          ['today', 'היום'],
+          ['urgent', 'דחופות'],
+          ['in-progress', 'בתהליך'],
+          ['done', 'הושלמו'],
+        ] as const).map(([val, label]) => (
+          <button
+            key={val}
+            className={`tl-filter-chip ${selectedFilter === val ? 'tl-filter-active' : ''}`}
+            onClick={() => setSelectedFilter(val)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Task List */}
@@ -184,8 +231,14 @@ const TaskList = ({ tasks, onToggle, onDelete }: TaskListProps) => {
         {filteredTasks.length === 0 ? (
           <div className="tl-empty-state">אין משימות בסינון הנבחר.</div>
         ) : (
-          filteredTasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} />
+          filteredTasks.map(task => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onToggle={onToggle}
+              onDelete={onDelete}
+              onEdit={onEdit}
+            />
           ))
         )}
       </div>
