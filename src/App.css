@@ -8125,3 +8125,131 @@ html.dark .tl-edit-title,
 html.dark .tl-edit-date,
 html.dark .tl-edit-priority { background: var(--card); border-color: var(--border); color: var(--text); }
 html.dark .tl-edit-title { border-color: var(--primary); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE — COMPREHENSIVE FIX (hardcoded light colors)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Shared card/border patterns ── */
+html.dark .news-updates-card,
+html.dark .news-card {
+  border-color: var(--border);
+  border-top-color: var(--primary);
+}
+html.dark .news-updates-header,
+html.dark .news-card-header { border-bottom-color: var(--border); }
+html.dark .news-actions      { border-top-color: var(--border); }
+html.dark .news-refresh-button {
+  border-color: var(--border);
+  color: var(--primary);
+  background: var(--surface2);
+}
+html.dark .news-refresh-button:hover { background: var(--surface); border-color: var(--primary); }
+html.dark .news-open-button  { background: var(--primary); color: var(--card); }
+
+/* ── Task category badge ── */
+html.dark .tl-task-category {
+  background: rgba(147,197,253,.1);
+  border-color: rgba(147,197,253,.25);
+  color: var(--primary);
+}
+
+/* ── Task checkbox checked ── */
+html.dark .tl-task-checkbox.tl-checked {
+  background: var(--accent-teal);
+  border-color: var(--accent-teal);
+}
+
+/* ── Event source badges ── */
+html.dark .event-source-badge.source-gcal,
+html.dark .sched-source-badge.source-gcal {
+  color: #93c5fd;
+  border-color: rgba(147,197,253,.25);
+  background: rgba(147,197,253,.1);
+}
+html.dark .event-source-badge.source-manual,
+html.dark .sched-source-badge.source-manual {
+  color: #c4b5fd;
+  border-color: rgba(196,181,253,.25);
+  background: rgba(196,181,253,.1);
+}
+
+/* ── "Next event" highlight in timeline & schedule ── */
+html.dark .timeline-event-next { background: rgba(147,197,253,.07); }
+html.dark .sched-event-next    { background: rgba(147,197,253,.07); }
+html.dark .event-next-badge,
+html.dark .sched-next-badge {
+  background: rgba(147,197,253,.15);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* ── event-item-next, schedule-event-next hover ── */
+html.dark .event-item-next:hover,
+html.dark .schedule-event-next:hover { background: var(--surface2); }
+
+/* ── Smart recs added/done states ── */
+html.dark .smart-rec-card.smart-rec-added {
+  background: rgba(134,239,172,.08);
+  border-color: rgba(134,239,172,.2);
+}
+html.dark .smart-rec-done {
+  background: rgba(134,239,172,.12);
+  color: var(--green);
+}
+
+/* ── Suggestions success ── */
+html.dark .suggestions-success {
+  background: rgba(134,239,172,.1);
+  border-color: rgba(134,239,172,.2);
+  color: var(--green);
+}
+
+/* ── GCal error msg ── */
+html.dark .events-gcal-msg--error {
+  background: rgba(244,168,184,.1);
+  border-color: rgba(244,168,184,.25);
+  color: var(--red);
+}
+
+/* ── Quick insights empty ── */
+html.dark .quick-insights-empty { color: var(--text-muted); }
+html.dark .qi-wisdom { background: var(--card-secondary); }
+html.dark .qi-wisdom-text { color: var(--text); }
+
+/* ── Daily summary additional overrides ── */
+html.dark .ds2-section-label { color: var(--text-muted); }
+html.dark .ds2-section-label.ds2-label--muted { color: var(--text-light); }
+html.dark .ds2-event-time  { color: var(--primary); }
+html.dark .ds2-more-badge  { background: rgba(147,197,253,.15); color: var(--primary); }
+html.dark .ds2-task-dot    { background: var(--text-muted); }
+html.dark .ds2-dot--red    { background: var(--red); }
+html.dark .ds2-dot--blue   { background: var(--blue); }
+html.dark .ds2-top         { border-bottom-color: var(--border); }
+
+/* ── Alert action buttons ── */
+html.dark .alert-action-btn--plan { background: rgba(147,197,253,.15); color: var(--primary); border-color: rgba(147,197,253,.3); }
+html.dark .alert-action-btn--add-secondary { color: var(--text-muted); border-color: var(--border); }
+html.dark .alert-action-btn--done { background: rgba(134,239,172,.1); color: var(--green); border-color: rgba(134,239,172,.2); }
+html.dark .alert-action-btn--handled { color: var(--text-muted); border-color: var(--border); }
+
+/* ── Future calendar ── */
+html.dark .futureCalendarDayCell--today { background: rgba(147,197,253,.12); }
+html.dark .futureCalendarDayCell--has-events { border-color: rgba(147,197,253,.3); }
+
+/* ── Payments PDF upload area ── */
+html.dark .pi-receipt-upload-area,
+html.dark .pi-pdf-drop-zone {
+  background: var(--card-secondary);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+/* ── Inputs (global catch-all) ── */
+html.dark select,
+html.dark input[type="date"],
+html.dark input[type="text"] {
+  background: var(--card-secondary);
+  color: var(--text);
+  border-color: var(--border);
+}
