@@ -71,7 +71,6 @@ const PaymentsInsightsCard = lazy(() => import('./PaymentsInsightsCard'));
 const ImportantEmailsCard = lazy(() => import('./ImportantEmailsCard'));
 const PersonalWidget = lazy(() => import('./PersonalWidget'));
 const FutureEventsPanel = lazy(() => import('./FutureEventsPanel'));
-const QuickInsightsCard = lazy(() => import('./QuickInsightsCard'));
 
 interface DashboardLayoutProps {
   onExitToOnboarding?: () => void;
@@ -183,9 +182,6 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
             </Suspense>
           </div>
           <div className="dashboard-col">
-            <Suspense fallback={null}>
-              <QuickInsightsCard calendarEvents={calendarEvents} tasks={tasks} />
-            </Suspense>
             <AlertsCard
               calendarEvents={calendarEvents}
               tasks={tasks}
@@ -204,7 +200,7 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <ImportantEmailsCard onAddTask={addTask} onAddEvent={addEvent} existingTaskTitles={existingTaskTitles} />
             </Suspense>
-            <AiAssistant />
+            <AiAssistant tasks={tasks} calendarEvents={calendarEvents} />
           </div>
         </section>
       </main>

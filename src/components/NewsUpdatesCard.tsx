@@ -106,7 +106,7 @@ const NewsUpdatesCard = ({ compact = false, onOpenModal, onItemsLoaded, demoMode
     setLoadError(null);
 
     try {
-      const data = await fetchMorningNews();
+      const data = await fetchMorningNews(true);
       if (data.length > 0) {
         setItems(data);
         onItemsLoaded?.(data);

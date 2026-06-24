@@ -7709,3 +7709,44 @@ html.dark .spm-task-row { background: var(--card-secondary); }
 html.dark .spm-task-title,
 html.dark .spm-task-date { background: var(--card); color: var(--text); border-color: var(--border); }
 html.dark .spm-footer { background: var(--card); }
+
+/* Quick insights — relax button + result */
+.quick-insight-btn--relax {
+  background: linear-gradient(90deg, #e8f4ff, #f0faf8) !important;
+  border-color: var(--accent-teal) !important;
+  color: var(--accent-teal) !important;
+}
+.quick-insight-btn--relax.quick-insight-btn--active {
+  background: linear-gradient(90deg, var(--accent-teal), var(--primary)) !important;
+  color: #fff !important;
+}
+.quick-insights-relax .qi-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.quick-insights-relax .qi-action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: .82rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background .15s;
+}
+.quick-insights-relax .qi-action-chip:hover {
+  background: var(--accent-mint);
+  color: var(--accent-teal);
+}
+html.dark .quick-insight-btn--relax {
+  background: linear-gradient(90deg, #1e2d3e, #1a2b32) !important;
+}
+html.dark .quick-insights-relax .qi-action-chip {
+  background: var(--card-secondary);
+  color: var(--text);
+}

@@ -149,10 +149,11 @@ const ALLORIGINS_PROXY = 'https://api.allorigins.win/raw?url=';
 /**
  * Fetch Google News RSS through AllOrigins CORS proxy.
  */
-export async function fetchGoogleNewsRss(): Promise<NewsItem[]> {
+export async function fetchGoogleNewsRss(bustCache = false): Promise<NewsItem[]> {
   try {
-    const proxyUrl = ALLORIGINS_PROXY + encodeURIComponent(RSS_URL);
-    const res = await fetch(proxyUrl);
+    const url = bustCache ? `${RSS_URL}&_t=${Date.now()}` : RSS_URL;
+    const proxyUrl = ALLORIGINS_PROXY + encodeURIComponent(url);
+    const res = await fetch(proxyUrl, bustCache ? { cache: 'no-store' } : undefined);
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -170,8 +171,8 @@ export async function fetchGoogleNewsRss(): Promise<NewsItem[]> {
 /**
  * Fetch morning news headlines (public API).
  */
-export async function fetchMorningNews(): Promise<NewsItem[]> {
-  return fetchGoogleNewsRss();
+export async function fetchMorningNews(bustCache = false): Promise<NewsItem[]> {
+  return fetchGoogleNewsRss(bustCache);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
