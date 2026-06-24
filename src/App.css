@@ -8213,9 +8213,19 @@ html.dark .events-gcal-msg--error {
 }
 
 /* ── Quick insights empty ── */
-html.dark .quick-insights-empty { color: var(--text-muted); }
-html.dark .qi-wisdom { background: var(--card-secondary); }
+html.dark .quick-insights-empty {
+  background: var(--card-secondary);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+html.dark .quick-insights-result {
+  background: var(--card-secondary);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+html.dark .qi-wisdom { background: var(--card-secondary); border-color: var(--border); }
 html.dark .qi-wisdom-text { color: var(--text); }
+html.dark .quick-insights-relax { background: var(--card-secondary); border-color: var(--border); }
 
 /* ── Daily summary additional overrides ── */
 html.dark .ds2-section-label { color: var(--text-muted); }
