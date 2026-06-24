@@ -62,9 +62,16 @@ const TaskList = ({ tasks, onToggle }: TaskListProps) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
   const allCount = tasks.length;
-  const urgentCount = tasks.filter((t) => t.priority === 'high' && !t.completed).length;
-  const todayCount = tasks.filter((t) => isToday(t.dueDate) && !t.completed).length;
-  const doneCount = tasks.filter((t) => t.completed).length;
+  const urgentCount = tasks.filter((t) =>
+    !t.completed && (
+      t.priority === 'high' ||
+      t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical'
+    )
+  ).length;
+  const todayCount = tasks.filter((t) =>
+    !t.completed && (isToday(t.dueDate) || isToday(t.deadlineDate ?? ''))
+  ).length;
+  const doneCount = tasks.filter((t) => t.completed || t.status === 'done').length;
 
   // Filter tasks based on selection
   const getFilteredTasks = () => {

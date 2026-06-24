@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import type { Task, CalendarEvent } from '../types';
-import { isToday } from '../utils/priority';
+import { isToday, isTomorrow } from '../utils/priority';
 
 interface DailySummaryCardProps {
   tasks: Task[];
@@ -8,136 +8,96 @@ interface DailySummaryCardProps {
   newsCount: number;
 }
 
-const DailySummaryCard = ({ tasks, calendarEvents, newsCount }: DailySummaryCardProps) => {
-  const [expanded, setExpanded] = useState(true);
+function todayStr() { return new Date().toISOString().split('T')[0]; }
 
-  // Calculate real statistics
-  const stats = useMemo(() => {
-    // Count urgent tasks (high priority, not completed)
-    const urgentTasks = tasks.filter(t => t.priority === 'high' && !t.completed);
+function greetingByHour(): string {
+  const h = new Date().getHours();
+  if (h < 6)  return 'לילה טוב 🌙';
+  if (h < 12) return 'בוקר טוב ☀️';
+  if (h < 17) return 'צהריים טובים 🌤️';
+  if (h < 21) return 'ערב טוב 🌆';
+  return 'לילה טוב 🌙';
+}
 
-    // Count today's calendar events
-    const todayEvents = calendarEvents.filter(e => isToday(e.date));
+const DailySummaryCard = ({ tasks, calendarEvents }: DailySummaryCardProps) => {
+  const today = todayStr();
 
-    // Count alerts (approximate: urgent tasks + today events with importance)
-    const alerts = [
-      ...urgentTasks,
-      ...todayEvents.filter(e => e.importance === 'important' || e.importance === 'urgent'),
-    ].length;
+  const data = useMemo(() => {
+    const todayEvents = calendarEvents
+      .filter(e => e.date === today && e.source !== 'demo')
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-    return {
-      urgentTasks: urgentTasks.length,
-      todayEvents: todayEvents.length,
-      alerts: Math.min(alerts, 10), // Cap at 10 for display
-      todayEventsList: todayEvents.slice(0, 2), // First 2 events for summary
-      urgentTasksList: urgentTasks.slice(0, 2), // First 2 urgent tasks
-    };
-  }, [tasks, calendarEvents]);
+    const openTasks = tasks.filter(t => !t.completed && t.status !== 'done');
+    const urgentTasks = openTasks.filter(t =>
+      t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent'
+    );
+    const todayTasks = openTasks.filter(t => isToday(t.dueDate) || isToday(t.deadlineDate ?? ''));
+    const nextEvent = todayEvents[0] ?? null;
+    const topTask = urgentTasks[0] ?? todayTasks[0] ?? openTasks[0] ?? null;
 
-  // Generate summary text based on real data
-  const generateSummary = (): string => {
-    // If no data at all
-    if (stats.todayEvents === 0 && stats.urgentTasks === 0 && newsCount === 0) {
-      return 'יש לך היום כמה עדכונים זמינים. חברי לוח שנה, משימות ומיילים כדי לקבל סיכום יומי מלא יותר.';
-    }
+    return { todayEvents, openTasks, urgentTasks, todayTasks, nextEvent, topTask };
+  }, [tasks, calendarEvents, today]);
 
-    const parts: string[] = [];
-
-    // Add today's events summary
-    if (stats.todayEvents > 0) {
-      const eventTitles = stats.todayEventsList
-        .map(e => `${e.title} ב־${e.startTime}`)
-        .join(', ');
-      parts.push(`יש לך היום ${stats.todayEvents} אירוע בלוח הזמנים: ${eventTitles}.`);
-    }
-
-    // Add urgent tasks summary
-    if (stats.urgentTasks > 0) {
-      const taskTitles = stats.urgentTasksList
-        .map(t => t.title)
-        .join(', ');
-      parts.push(`${stats.urgentTasks} משימות דחופות בהמתנה: ${taskTitles}.`);
-    }
-
-    // Add news summary if available
-    if (newsCount > 0) {
-      parts.push(`יש ${newsCount} עדכוני בוקר חשובים לדעת.`);
-    }
-
-    // Add recommendation
-    if (stats.todayEvents > 0 || stats.urgentTasks > 0) {
-      if (stats.todayEvents > 0) {
-        parts.push('מומלץ להתחיל מהאירועים הקרובים ולתכנן את יום כדי להספיק לכל המשימות.');
-      } else if (stats.urgentTasks > 0) {
-        parts.push('מומלץ להתחיל מהמשימות הדחופות ולהקצות זמן מספיק להשלמתן.');
-      }
-    }
-
-    return parts.join(' ');
-  };
-
-  const summaryText = generateSummary();
+  const hasData = data.todayEvents.length > 0 || data.openTasks.length > 0;
 
   return (
-    <section className="daily-summary-card">
-      {/* Header */}
-      <header className="daily-summary-header" onClick={() => setExpanded(e => !e)} style={{ cursor: 'pointer' }}>
-        <div className="daily-summary-header-content">
-          <h2 className="daily-summary-title">סיכום יומי חכם</h2>
-          <p className="daily-summary-subtitle">מה חשוב לדעת לפני שמתחילים את היום</p>
-        </div>
-        <span className="daily-summary-icon">📊</span>
-      </header>
+    <section className="ds2-card">
+      <div className="ds2-greeting">{greetingByHour()}</div>
 
-      {/* Collapsed view - show compact summary */}
-      {!expanded && (
-        <div className="daily-summary-compact">
-          <p className="daily-summary-compact-text">
-            {summaryText.split('.')[0] + '.'}
-          </p>
-          <button
-            className="daily-summary-expand-btn"
-            onClick={() => setExpanded(true)}
-            type="button"
-          >
-            פתח סיכום מלא
-          </button>
-        </div>
-      )}
-
-      {/* Expanded view - show full content */}
-      {expanded && (
-        <div className="daily-summary-body">
-          <p className="daily-summary-text">{summaryText}</p>
-
-          <div className="daily-summary-chips">
-            {stats.urgentTasks > 0 && (
-              <div className="daily-summary-chip daily-summary-chip-urgent">
-                <span className="daily-summary-chip-icon">🔥</span>
-                <span>{stats.urgentTasks} משימות דחופות</span>
+      {!hasData ? (
+        <p className="ds2-empty">
+          אין נתונים כרגע — חברי לוח שנה ומשימות לקבלת סיכום מותאם אישית.
+        </p>
+      ) : (
+        <div className="ds2-rows">
+          {/* Next calendar event today */}
+          {data.nextEvent && (
+            <div className="ds2-row ds2-row--event">
+              <span className="ds2-row-icon">📅</span>
+              <div className="ds2-row-body">
+                <span className="ds2-row-label">הבא בלוח</span>
+                <span className="ds2-row-value">{data.nextEvent.title} — {data.nextEvent.startTime}</span>
               </div>
+              {data.todayEvents.length > 1 && (
+                <span className="ds2-badge">+{data.todayEvents.length - 1}</span>
+              )}
+            </div>
+          )}
+
+          {/* Top urgent task */}
+          {data.topTask && (
+            <div className="ds2-row ds2-row--task">
+              <span className="ds2-row-icon">🔥</span>
+              <div className="ds2-row-body">
+                <span className="ds2-row-label">
+                  {data.urgentTasks.length > 0 ? 'משימה דחופה' : 'משימה הבאה'}
+                </span>
+                <span className="ds2-row-value">{data.topTask.title}</span>
+              </div>
+              {data.urgentTasks.length > 1 && (
+                <span className="ds2-badge ds2-badge--red">+{data.urgentTasks.length - 1} דחופות</span>
+              )}
+            </div>
+          )}
+
+          {/* Stats row */}
+          <div className="ds2-stats">
+            {data.todayEvents.length > 0 && (
+              <span className="ds2-stat">
+                <strong>{data.todayEvents.length}</strong> אירועים היום
+              </span>
             )}
-            {stats.todayEvents > 0 && (
-              <div className="daily-summary-chip daily-summary-chip-events">
-                <span className="daily-summary-chip-icon">📅</span>
-                <span>{stats.todayEvents} אירועים היום</span>
-              </div>
+            {data.todayTasks.length > 0 && (
+              <span className="ds2-stat ds2-stat--warn">
+                <strong>{data.todayTasks.length}</strong> למשימות היום
+              </span>
             )}
-            {stats.alerts > 0 && (
-              <div className="daily-summary-chip daily-summary-chip-alerts">
-                <span className="daily-summary-chip-icon">🔔</span>
-                <span>{stats.alerts} התראות</span>
-              </div>
+            {data.openTasks.length > 0 && (
+              <span className="ds2-stat">
+                <strong>{data.openTasks.length}</strong> פתוחות סה״כ
+              </span>
             )}
           </div>
-
-          <button
-            className="daily-summary-collapse-btn"
-            onClick={() => setExpanded(false)}
-            type="button"
-          >
-            כווץ סיכום
-          </button>
         </div>
       )}
     </section>

@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import type { Alert, Task, CalendarEvent } from '../types';
 import { priorityColor } from '../utils/priority';
 import { generateSmartAlerts, planTasksToTasks } from '../utils/alertGenerator';
+
+const StudyPlanModal = lazy(() => import('./StudyPlanModal'));
 
 const alertTypeIcon: Record<Alert['type'], string> = {
   payment: '💳',
@@ -113,6 +115,7 @@ const AlertsCard = ({
   const [handledIds, setHandledIds] = useState<Set<string>>(new Set());
   const [addedAlertIds, setAddedAlertIds] = useState<Map<string, 'single' | 'plan'>>(new Map());
   const [confirmation, setConfirmation] = useState('');
+  const [planningAlert, setPlanningAlert] = useState<Alert | null>(null);
 
   const activeAlerts = generatedAlerts.filter(
     a => !dismissedIds.has(a.id) && !handledIds.has(a.id)
@@ -157,42 +160,19 @@ const AlertsCard = ({
     showConfirmation('ההתראה נוספה למשימות לפי רמת דחיפות');
   };
 
+  // Open the editable plan modal instead of auto-adding
   const handleAddPlan = (alert: Alert) => {
-    if (!alert.planTasks || !alert.dueDate) return;
-    if (addedAlertIds.has(alert.id)) {
-      showConfirmation('הלוז כבר תוכנן');
-      return;
-    }
-    const taskObjects = planTasksToTasks(alert.planTasks, alert.dueDate);
-    const toAdd = taskObjects.filter(t => !existingTaskTitles.has(t.title));
+    if (addedAlertIds.has(alert.id)) { showConfirmation('הלוז כבר תוכנן'); return; }
+    setPlanningAlert(alert);
+  };
 
-    if (toAdd.length === 0) {
-      showConfirmation('המשימות כבר קיימות');
-      return;
-    }
-
-    const addFn = onAddTasks ?? (ts => ts.forEach(t => onAddTask?.({
-      ...t,
-      description: alert.title,
-      category: 'personal',
-      completed: false,
-      status: 'open',
-      source: 'smart-alert',
-      originalAlertId: alert.id,
-    })));
-
-    addFn(toAdd.map(t => ({
-      ...t,
-      description: alert.title,
-      category: 'personal',
-      completed: false,
-      status: 'open' as const,
-      source: 'smart-alert',
-      originalAlertId: alert.id,
-    })));
-
-    setAddedAlertIds(prev => new Map(prev).set(alert.id, 'plan'));
-    showConfirmation(`לוז תוכנן — נוספו ${toAdd.length} משימות לפי תאריכים`);
+  const handlePlanConfirmed = (tasksToAdd: Omit<Task, 'id' | 'createdAt'>[], alertId: string) => {
+    const addFn = onAddTasks
+      ? () => onAddTasks(tasksToAdd as Omit<Task, 'id'>[])
+      : () => tasksToAdd.forEach(t => onAddTask?.(t));
+    addFn();
+    setAddedAlertIds(prev => new Map(prev).set(alertId, 'plan'));
+    showConfirmation(`לוז נשמר — ${tasksToAdd.length} משימות נוספו`);
   };
 
   if (activeAlerts.length === 0) {
@@ -211,29 +191,42 @@ const AlertsCard = ({
   }
 
   return (
-    <div className="card">
-      <div className="card-header">
-        <div className="card-title-row">
-          <span className="card-icon">🔔</span>
-          <h2 className="card-title">התראות חכמות</h2>
-          <span className="badge badge-red">{activeAlerts.length}</span>
+    <>
+      <div className="card">
+        <div className="card-header">
+          <div className="card-title-row">
+            <span className="card-icon">🔔</span>
+            <h2 className="card-title">התראות חכמות</h2>
+            <span className="badge badge-red">{activeAlerts.length}</span>
+          </div>
+        </div>
+        {confirmation && <div className="alertsConfirmation">{confirmation}</div>}
+        <div className="alert-list">
+          {activeAlerts.map(a => (
+            <AlertItem
+              key={a.id}
+              alert={a}
+              addedState={addedAlertIds.get(a.id) ?? 'none'}
+              onDismiss={dismiss}
+              onAddTask={handleAddTask}
+              onAddPlan={handleAddPlan}
+              onMarkHandled={markHandled}
+            />
+          ))}
         </div>
       </div>
-      {confirmation && <div className="alertsConfirmation">{confirmation}</div>}
-      <div className="alert-list">
-        {activeAlerts.map(a => (
-          <AlertItem
-            key={a.id}
-            alert={a}
-            addedState={addedAlertIds.get(a.id) ?? 'none'}
-            onDismiss={dismiss}
-            onAddTask={handleAddTask}
-            onAddPlan={handleAddPlan}
-            onMarkHandled={markHandled}
+
+      {planningAlert && (
+        <Suspense fallback={null}>
+          <StudyPlanModal
+            alert={planningAlert}
+            onClose={() => setPlanningAlert(null)}
+            onConfirm={handlePlanConfirmed}
+            existingTaskTitles={existingTaskTitles}
           />
-        ))}
-      </div>
-    </div>
+        </Suspense>
+      )}
+    </>
   );
 };
 

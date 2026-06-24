@@ -603,7 +603,6 @@ function SummaryChips({ a }: { a: StatementAnalysis }) {
       {a.fixedPayments.length > 0 && <span className="pi-chip pi-chip--fixed">🔁 {a.fixedPayments.length} קבועים</span>}
       {a.installments.length  > 0 && <span className="pi-chip pi-chip--install">📦 {a.installments.length} תשלומים</span>}
       {a.anomalies.length     > 0 && <span className="pi-chip pi-chip--anomaly">⚠️ {a.anomalies.length} חריגים</span>}
-      {a.subscriptions.length > 0 && <span className="pi-chip pi-chip--sub">📱 {a.subscriptions.length} מנויים</span>}
     </div>
   );
 }
@@ -1315,18 +1314,7 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
               {/* 4. Anomalies — always show section (empty state if none) */}
               <AnomaliesSection items={displayAnalysis.anomalies} />
 
-              {/* 5. Possible subscriptions — collapsed */}
-              {displayAnalysis.subscriptions.length > 0 && (
-                <div className="pi-section pi-section--collapsed-sub">
-                  <CollapsedSection title={`עוד תובנות אפשריות · ${displayAnalysis.subscriptions.length} מנויים`}>
-                    <div className="pi-cards-grid pi-cards-grid--sub">
-                      {displayAnalysis.subscriptions.map((item, idx) => (
-                        <CompactSubscriptionCard key={idx} item={item} />
-                      ))}
-                    </div>
-                  </CollapsedSection>
-                </div>
-              )}
+              {/* subscriptions section removed — not actionable enough */}
 
             </div>
           )}
