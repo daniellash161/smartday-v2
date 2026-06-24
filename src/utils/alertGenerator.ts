@@ -207,7 +207,8 @@ function generatePlanningAlerts(events: CalendarEvent[]): Alert[] {
 
 function buildStudyPlan(event: CalendarEvent, daysUntil: number): AlertPlanTask[] {
   const tasks: AlertPlanTask[] = [];
-  const name = event.title;
+  // Strip "מבחן / בחינה" prefix so study tasks don't look like exam events in the calendar
+  const name = event.title.replace(/^(מבחן|בחינה)\s*/i, '').replace(/\s*(מבחן|בחינה)$/i, '').trim() || event.title;
   if (daysUntil >= 10) {
     tasks.push({ title: `סקירת חומר — ${name}: מה בחומר הלימוד?`, daysBeforeEvent: Math.floor(daysUntil * 0.85), urgency: 'low' });
     tasks.push({ title: `${name}: פרק 1 — קריאה ורישום עיקרי דברים`, daysBeforeEvent: Math.floor(daysUntil * 0.7), urgency: 'low' });

@@ -11,7 +11,7 @@ function addEventsToCalendar(tasks: Omit<Task, 'id' | 'createdAt'>[], alertTitle
     const existing: CalendarEvent[] = stored ? JSON.parse(stored) : [];
     const newEvents: CalendarEvent[] = tasks.map((t, i) => ({
       id: `study-plan-${Date.now()}-${i}`,
-      title: t.title,
+      title: `📖 ${t.title}`,
       date: t.dueDate ?? new Date().toISOString().split('T')[0],
       startTime: '09:00',
       endTime: '11:00',
