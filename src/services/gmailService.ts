@@ -62,7 +62,7 @@ interface GmailMessage {
 }
 
 // ---------------------------------------------------------------------------
-// SessionStorage helpers  (separate keys from Calendar — never localStorage)
+// Storage helpers — localStorage so session persists across page reloads
 // ---------------------------------------------------------------------------
 
 const SS_TOKEN  = 'smartday-gmail-token';
@@ -73,25 +73,26 @@ let _gmailToken: string | null = null;
 function _saveGmailSession(token: string, expiresIn: number): void {
   _gmailToken = token;
   const expiry = Date.now() + expiresIn * 1_000;
-  sessionStorage.setItem(SS_TOKEN,  token);
-  sessionStorage.setItem(SS_EXPIRY, String(expiry));
+  localStorage.setItem(SS_TOKEN,  token);
+  localStorage.setItem(SS_EXPIRY, String(expiry));
 }
 
-/** Clear the Gmail token from memory and sessionStorage. */
+/** Clear the Gmail token from memory and storage. */
 export function clearGmailToken(): void {
   _gmailToken = null;
+  localStorage.removeItem(SS_TOKEN);
+  localStorage.removeItem(SS_EXPIRY);
   sessionStorage.removeItem(SS_TOKEN);
   sessionStorage.removeItem(SS_EXPIRY);
 }
 
 /**
- * Try to restore a Gmail session from sessionStorage.
+ * Try to restore a Gmail session from storage.
  * Returns true if a valid, non-expired token was found.
- * Call once on component mount.
  */
 export function restoreGmailSession(): boolean {
-  const token  = sessionStorage.getItem(SS_TOKEN);
-  const expiry = Number(sessionStorage.getItem(SS_EXPIRY) ?? '0');
+  const token  = localStorage.getItem(SS_TOKEN) ?? sessionStorage.getItem(SS_TOKEN);
+  const expiry = Number(localStorage.getItem(SS_EXPIRY) ?? sessionStorage.getItem(SS_EXPIRY) ?? '0');
   if (!token || Date.now() >= expiry) {
     clearGmailToken();
     return false;

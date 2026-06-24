@@ -50,6 +50,12 @@ export interface CalendarEvent {
   calendarName?: string;
 }
 
+export interface AlertPlanTask {
+  title: string;
+  daysBeforeEvent: number;
+  urgency: 'high' | 'medium' | 'low';
+}
+
 export interface Alert {
   id: string;
   title: string;
@@ -63,6 +69,7 @@ export interface Alert {
   dueDate?: string;
   priorityScore?: number;
   reason?: string;
+  planTasks?: AlertPlanTask[];
 }
 
 export interface AiMessage {

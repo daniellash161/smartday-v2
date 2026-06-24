@@ -186,6 +186,7 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
               calendarEvents={calendarEvents}
               tasks={tasks}
               onAddTask={addTask}
+              onAddTasks={addTasks}
               existingTaskTitles={existingTaskTitles}
             />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>

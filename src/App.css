@@ -6416,12 +6416,12 @@ html.dark .manualEventField label {
 
 .onb-card {
   width: 100%;
-  max-width: 560px;
+  max-width: 680px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
-  padding: 32px 32px 24px;
+  padding: 48px 48px 36px;
   animation: onb-pop 0.35s ease;
 }
 
@@ -6431,11 +6431,11 @@ html.dark .manualEventField label {
 }
 
 .onb-brand {
-  font-size: 1.6rem;
+  font-size: 2rem;
   font-weight: 800;
   letter-spacing: -0.5px;
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 .onb-brand-smart { color: var(--accent-teal); }
 .onb-brand-day   { color: var(--primary); }
@@ -6468,21 +6468,21 @@ html.dark .manualEventField label {
 @keyframes onb-fade { from { opacity: 0; } to { opacity: 1; } }
 
 .onb-welcome { text-align: center; padding: 8px 0 4px; }
-.onb-welcome-emoji { font-size: 3rem; margin-bottom: 8px; }
+.onb-welcome-emoji { font-size: 4rem; margin-bottom: 12px; }
 
 .onb-title {
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   font-weight: 800;
   color: var(--text);
   line-height: 1.35;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
 }
 .onb-subtitle {
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   color: var(--text-muted);
   line-height: 1.6;
-  margin: 0 auto 24px;
-  max-width: 420px;
+  margin: 0 auto 28px;
+  max-width: 480px;
 }
 
 .onb-step-title {
@@ -6587,10 +6587,10 @@ html.dark .manualEventField label {
 
 /* Buttons */
 .onb-btn {
-  padding: 12px 26px;
+  padding: 15px 32px;
   border: none;
   border-radius: 999px;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -7271,3 +7271,18 @@ html.dark .emailsKeywordsInput input { background: var(--card-secondary); color:
 html.dark .emailsActionBtn { background: var(--card); color: var(--text); }
 html.dark .alert-action-btn { background: var(--card); color: var(--text); }
 html.dark .alert-source-tag { background: #2a2060; color: #b0a0ff; }
+
+/* Alert plan button */
+.alert-action-btn--plan {
+  background: linear-gradient(90deg, var(--accent-teal), var(--primary));
+  color: #fff;
+  border-color: transparent;
+  font-size: .82rem;
+}
+.alert-action-btn--plan:hover { opacity: .88; }
+.alert-action-btn--add-secondary {
+  color: var(--text-muted);
+  background: transparent;
+  border-color: var(--border);
+  font-size: .8rem;
+}

@@ -161,15 +161,13 @@ const ImportantEmailsModal = ({
     setKeywords(prev => prev.filter(k => k !== kw));
   };
 
-  // Filter emails by keywords
-  const filteredEmails = useMemo(() => {
-    return emails.filter(e => {
-      const text = `${e.subject} ${e.snippet ?? ''} ${e.preview ?? ''}`.toLowerCase();
-      return keywords.some(kw => text.includes(kw.toLowerCase()))
-        || e.importance === 'urgent'
-        || e.importance === 'high';
-    });
-  }, [emails, keywords]);
+  // Show all emails; just detect which ones match keywords (for badge display)
+  const filteredEmails = emails;
+
+  const matchedKeyword = (email: ImportantEmail): string | null => {
+    const text = `${email.subject} ${email.snippet ?? ''} ${email.preview ?? ''}`.toLowerCase();
+    return keywords.find(kw => text.includes(kw.toLowerCase())) ?? null;
+  };
 
   const handleAddTask = (email: ImportantEmail) => {
     const { score, urgency, dueDate, reason } = calcEmailPriority(email, keywords);
@@ -269,7 +267,10 @@ const ImportantEmailsModal = ({
           ) : (
             <div className="emailsModalList">
               {filteredEmails.map(email => {
-                const { reason: detectedReason } = calcEmailPriority(email, keywords);
+                const kw = matchedKeyword(email);
+                const displayReason = kw
+                  ? `זוהה כי המייל כולל את המילה: ${kw}`
+                  : email.reason ?? null;
                 const title = email.subject.length > 55 ? email.subject.slice(0,55).trimEnd()+'…' : email.subject;
                 const alreadyAdded = addedFromEmailIds.has(email.id) || existingTaskTitles.has(title);
                 return (
@@ -280,8 +281,8 @@ const ImportantEmailsModal = ({
                     </div>
                     <p className="emailsModalSubject">{email.subject}</p>
                     <p className="emailsModalPreview">{email.snippet ?? email.preview}</p>
-                    {detectedReason && (
-                      <span className="emailsModalReason">🔍 {detectedReason}</span>
+                    {displayReason && (
+                      <span className="emailsModalReason">🔍 {displayReason}</span>
                     )}
                     <div className="emailsModalActions">
                       {alreadyAdded ? (
