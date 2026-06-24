@@ -425,8 +425,18 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
   const [appleEvents,  setAppleEvents]  = useState<CalendarEvent[]>(() => loadAppleEvents());
   const [appleError,   setAppleError]   = useState<string | null>(null);
 
-  // Manual events state
+  // Manual events state — also listen for external writes (e.g. study plan modal)
   const [manualEvents, setManualEvents] = useState<CalendarEvent[]>(() => loadManualEvents());
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'smartday-manual-calendar-events') {
+        setManualEvents(loadManualEvents());
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
   const [showManualEventModal, setShowManualEventModal] = useState(false);
 
   const now = new Date();

@@ -130,6 +130,7 @@ interface ImportantEmailsModalProps {
   addedFromEmailIds: Set<string>;
   onAddTask: (task: Omit<Task, 'id' | 'createdAt'>, emailId: string) => void;
   onMarkHandled: (emailId: string) => void;
+  onKeywordsChanged?: () => void;
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
@@ -143,6 +144,7 @@ const ImportantEmailsModal = ({
   addedFromEmailIds,
   onAddTask,
   onMarkHandled,
+  onKeywordsChanged,
 }: ImportantEmailsModalProps) => {
   const [keywords, setKeywords] = useState<string[]>(loadKeywords);
   const [kwInput, setKwInput] = useState('');
@@ -155,10 +157,13 @@ const ImportantEmailsModal = ({
     if (!trimmed || keywords.includes(trimmed)) return;
     setKeywords(prev => [...prev, trimmed]);
     setKwInput('');
+    // Trigger re-fetch in parent so new keyword matches fresh emails
+    setTimeout(() => onKeywordsChanged?.(), 50);
   };
 
   const removeKeyword = (kw: string) => {
     setKeywords(prev => prev.filter(k => k !== kw));
+    setTimeout(() => onKeywordsChanged?.(), 50);
   };
 
   const matchedKeyword = (email: ImportantEmail): string | null => {

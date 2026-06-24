@@ -207,15 +207,27 @@ function generatePlanningAlerts(events: CalendarEvent[]): Alert[] {
 
 function buildStudyPlan(event: CalendarEvent, daysUntil: number): AlertPlanTask[] {
   const tasks: AlertPlanTask[] = [];
-  if (daysUntil >= 5) {
-    tasks.push({ title: `לחזור על נושאי ${event.title} — סקירה כללית`, daysBeforeEvent: Math.floor(daysUntil * 0.7), urgency: 'low' });
-    tasks.push({ title: `לתרגל שאלות בנושאי ${event.title}`, daysBeforeEvent: Math.floor(daysUntil * 0.4), urgency: 'medium' });
-    tasks.push({ title: `חזרה אחרונה לפני ${event.title} — להתמקד בנקודות חלשות`, daysBeforeEvent: 1, urgency: 'high' });
+  const name = event.title;
+  if (daysUntil >= 10) {
+    tasks.push({ title: `סקירת חומר — ${name}: מה בחומר הלימוד?`, daysBeforeEvent: Math.floor(daysUntil * 0.85), urgency: 'low' });
+    tasks.push({ title: `${name}: פרק 1 — קריאה ורישום עיקרי דברים`, daysBeforeEvent: Math.floor(daysUntil * 0.7), urgency: 'low' });
+    tasks.push({ title: `${name}: פרקים 2-3 — קריאה + תרגול`, daysBeforeEvent: Math.floor(daysUntil * 0.55), urgency: 'medium' });
+    tasks.push({ title: `${name}: תרגול שאלות ממבחנים קודמים`, daysBeforeEvent: Math.floor(daysUntil * 0.35), urgency: 'medium' });
+    tasks.push({ title: `${name}: סיכום נושאי הסיכון + נקודות חלשות`, daysBeforeEvent: Math.floor(daysUntil * 0.2), urgency: 'high' });
+    tasks.push({ title: `${name}: חזרה אחרונה — נוסחאות ועיקרי דברים`, daysBeforeEvent: 1, urgency: 'high' });
+  } else if (daysUntil >= 5) {
+    tasks.push({ title: `${name}: סקירה כללית של החומר`, daysBeforeEvent: Math.floor(daysUntil * 0.8), urgency: 'low' });
+    tasks.push({ title: `${name}: לימוד מעמיק — פרקים ראשיים`, daysBeforeEvent: Math.floor(daysUntil * 0.6), urgency: 'medium' });
+    tasks.push({ title: `${name}: תרגול שאלות + סיכום נקודות חלשות`, daysBeforeEvent: Math.floor(daysUntil * 0.35), urgency: 'medium' });
+    tasks.push({ title: `${name}: חזרה על נושאי סיכון`, daysBeforeEvent: 2, urgency: 'high' });
+    tasks.push({ title: `${name}: חזרה אחרונה + בדיקת נוסחאות`, daysBeforeEvent: 1, urgency: 'high' });
   } else if (daysUntil >= 3) {
-    tasks.push({ title: `לחזור על חומר ${event.title}`, daysBeforeEvent: daysUntil - 1, urgency: 'medium' });
-    tasks.push({ title: `חזרה אחרונה — ${event.title}`, daysBeforeEvent: 1, urgency: 'high' });
+    tasks.push({ title: `${name}: לחזור על כל החומר`, daysBeforeEvent: daysUntil - 1, urgency: 'medium' });
+    tasks.push({ title: `${name}: תרגול שאלות`, daysBeforeEvent: 2, urgency: 'high' });
+    tasks.push({ title: `${name}: חזרה אחרונה`, daysBeforeEvent: 1, urgency: 'high' });
   } else {
-    tasks.push({ title: `ללמוד לקראת ${event.title}`, daysBeforeEvent: 1, urgency: 'high' });
+    tasks.push({ title: `${name}: ללמוד נושאים עיקריים`, daysBeforeEvent: 1, urgency: 'high' });
+    tasks.push({ title: `${name}: לקרוא סיכומים`, daysBeforeEvent: 1, urgency: 'high' });
   }
   return tasks;
 }

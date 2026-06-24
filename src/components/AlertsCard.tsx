@@ -96,6 +96,7 @@ interface AlertsCardProps {
   tasks?: Task[];
   onAddTask?: (task: Omit<Task, 'id' | 'createdAt'>) => void;
   onAddTasks?: (tasks: Omit<Task, 'id'>[]) => void;
+  onAddEvent?: (event: Omit<CalendarEvent, 'id'>) => void;
   existingTaskTitles?: Set<string>;
 }
 
@@ -104,6 +105,7 @@ const AlertsCard = ({
   tasks = [],
   onAddTask,
   onAddTasks,
+  onAddEvent,
   existingTaskTitles = new Set(),
 }: AlertsCardProps) => {
   const generatedAlerts = useMemo(
@@ -222,6 +224,7 @@ const AlertsCard = ({
             alert={planningAlert}
             onClose={() => setPlanningAlert(null)}
             onConfirm={handlePlanConfirmed}
+            onAddEvent={onAddEvent}
             existingTaskTitles={existingTaskTitles}
           />
         </Suspense>

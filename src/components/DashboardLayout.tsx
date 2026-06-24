@@ -142,8 +142,19 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
   const addTask = (task: Omit<Task, 'id' | 'createdAt'>) =>
     addTasks([task as Omit<Task, 'id'>]);
 
-  const addEvent = () => {
-    // Placeholder for event addition
+  const addEvent = (event: Omit<import('../types').CalendarEvent, 'id'>) => {
+    // Write to manual-events localStorage so EventsCard picks it up via storage event
+    try {
+      const stored = localStorage.getItem('smartday-manual-calendar-events');
+      const existing = stored ? JSON.parse(stored) : [];
+      const newEvent = { ...event, id: `manual-${Date.now()}` };
+      const updated = [...existing, newEvent];
+      localStorage.setItem('smartday-manual-calendar-events', JSON.stringify(updated));
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'smartday-manual-calendar-events',
+        newValue: JSON.stringify(updated),
+      }));
+    } catch { /* ignore */ }
   };
 
   const existingTaskTitles = new Set(tasks.map((t) => t.title));
@@ -190,6 +201,7 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
               tasks={tasks}
               onAddTask={addTask}
               onAddTasks={addTasks}
+              onAddEvent={addEvent}
               existingTaskTitles={existingTaskTitles}
             />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>

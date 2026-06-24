@@ -1,7 +1,33 @@
 // @ts-nocheck
 import { useState } from 'react';
-import type { Alert, Task } from '../types';
+import type { Alert, Task, CalendarEvent } from '../types';
 import { planTasksToTasks } from '../utils/alertGenerator';
+
+const MANUAL_EVENTS_KEY = 'smartday-manual-calendar-events';
+
+function addEventsToCalendar(tasks: Omit<Task, 'id' | 'createdAt'>[], alertTitle: string) {
+  try {
+    const stored = localStorage.getItem(MANUAL_EVENTS_KEY);
+    const existing: CalendarEvent[] = stored ? JSON.parse(stored) : [];
+    const newEvents: CalendarEvent[] = tasks.map((t, i) => ({
+      id: `study-plan-${Date.now()}-${i}`,
+      title: t.title,
+      date: t.dueDate ?? new Date().toISOString().split('T')[0],
+      startTime: '09:00',
+      endTime: '11:00',
+      category: 'personal' as const,
+      source: 'manual' as const,
+      description: `לוז למידה: ${alertTitle}`,
+    }));
+    const updated = [...existing, ...newEvents];
+    localStorage.setItem(MANUAL_EVENTS_KEY, JSON.stringify(updated));
+    // Notify EventsCard via storage event
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: MANUAL_EVENTS_KEY,
+      newValue: JSON.stringify(updated),
+    }));
+  } catch { /* ignore */ }
+}
 
 interface EditableTask {
   title: string;
@@ -16,6 +42,7 @@ interface StudyPlanModalProps {
   alert: Alert;
   onClose: () => void;
   onConfirm: (tasks: Omit<Task, 'id' | 'createdAt'>[], alertId: string) => void;
+  onAddEvent?: (event: Omit<CalendarEvent, 'id'>) => void;
   existingTaskTitles: Set<string>;
 }
 
@@ -32,7 +59,7 @@ const urgencyColor: Record<string, string> = {
   high: '#e8738f', medium: '#f4c76b', low: '#7ec98f',
 };
 
-const StudyPlanModal = ({ alert, onClose, onConfirm, existingTaskTitles }: StudyPlanModalProps) => {
+const StudyPlanModal = ({ alert, onClose, onConfirm, onAddEvent, existingTaskTitles }: StudyPlanModalProps) => {
   // Build initial editable tasks from planTasks
   const initial: EditableTask[] = alert.planTasks
     ? planTasksToTasks(alert.planTasks, alert.dueDate ?? new Date().toISOString().split('T')[0]).map(t => ({
@@ -68,6 +95,8 @@ const StudyPlanModal = ({ alert, onClose, onConfirm, existingTaskTitles }: Study
         reason: alert.title,
       }));
     onConfirm(toAdd, alert.id);
+    // Also add to calendar
+    addEventsToCalendar(toAdd, alert.title);
     onClose();
   };
 
@@ -144,7 +173,7 @@ const StudyPlanModal = ({ alert, onClose, onConfirm, existingTaskTitles }: Study
             onClick={handleConfirm}
             disabled={enabledCount === 0}
           >
-            שמור לוז ({enabledCount} משימות)
+            שמור לוז ({enabledCount} משימות + 📅 לוח שנה)
           </button>
         </footer>
       </div>

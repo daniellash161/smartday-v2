@@ -144,6 +144,7 @@ const ImportantEmailsCard = ({ onAddTask, onAddEvent, existingTaskTitles }: Prop
           addedFromEmailIds={addedFromEmailIds}
           onAddTask={handleAddTask}
           onMarkHandled={handleMarkHandled}
+          onKeywordsChanged={_doFetch}
         />
       )}
     </>
