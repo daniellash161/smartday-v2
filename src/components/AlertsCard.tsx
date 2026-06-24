@@ -113,9 +113,18 @@ const AlertsCard = ({
     [calendarEvents, tasks],
   );
 
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
-  const [handledIds, setHandledIds] = useState<Set<string>>(new Set());
-  const [addedAlertIds, setAddedAlertIds] = useState<Map<string, 'single' | 'plan'>>(new Map());
+  const [dismissedIds, setDismissedIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('smartday-dismissed-alerts') ?? '[]')); }
+    catch { return new Set(); }
+  });
+  const [handledIds, setHandledIds] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('smartday-handled-alerts') ?? '[]')); }
+    catch { return new Set(); }
+  });
+  const [addedAlertIds, setAddedAlertIds] = useState<Map<string, 'single' | 'plan'>>(() => {
+    try { return new Map(JSON.parse(localStorage.getItem('smartday-added-alerts') ?? '[]')); }
+    catch { return new Map(); }
+  });
   const [confirmation, setConfirmation] = useState('');
   const [planningAlert, setPlanningAlert] = useState<Alert | null>(null);
 
@@ -123,8 +132,20 @@ const AlertsCard = ({
     a => !dismissedIds.has(a.id) && !handledIds.has(a.id)
   );
 
-  const dismiss = (id: string) => setDismissedIds(prev => new Set(prev).add(id));
-  const markHandled = (id: string) => setHandledIds(prev => new Set(prev).add(id));
+  const dismiss = (id: string) => {
+    setDismissedIds(prev => {
+      const next = new Set(prev).add(id);
+      localStorage.setItem('smartday-dismissed-alerts', JSON.stringify([...next]));
+      return next;
+    });
+  };
+  const markHandled = (id: string) => {
+    setHandledIds(prev => {
+      const next = new Set(prev).add(id);
+      localStorage.setItem('smartday-handled-alerts', JSON.stringify([...next]));
+      return next;
+    });
+  };
 
   const showConfirmation = (msg: string) => {
     setConfirmation(msg);
@@ -158,7 +179,11 @@ const AlertsCard = ({
       reason: alert.reason ?? alert.title,
     });
 
-    setAddedAlertIds(prev => new Map(prev).set(alert.id, 'single'));
+    setAddedAlertIds(prev => {
+      const next = new Map(prev).set(alert.id, 'single');
+      localStorage.setItem('smartday-added-alerts', JSON.stringify([...next]));
+      return next;
+    });
     showConfirmation('ההתראה נוספה למשימות לפי רמת דחיפות');
   };
 
@@ -173,7 +198,11 @@ const AlertsCard = ({
       ? () => onAddTasks(tasksToAdd as Omit<Task, 'id'>[])
       : () => tasksToAdd.forEach(t => onAddTask?.(t));
     addFn();
-    setAddedAlertIds(prev => new Map(prev).set(alertId, 'plan'));
+    setAddedAlertIds(prev => {
+      const next = new Map(prev).set(alertId, 'plan');
+      localStorage.setItem('smartday-added-alerts', JSON.stringify([...next]));
+      return next;
+    });
     showConfirmation(`לוז נשמר — ${tasksToAdd.length} משימות נוספו`);
   };
 
