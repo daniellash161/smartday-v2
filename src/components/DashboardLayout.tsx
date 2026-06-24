@@ -117,6 +117,9 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
   const toggleTask = (id: string) =>
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
 
+  const deleteTask = (id: string) =>
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+
   const addTasks = (incoming: Omit<Task, 'id'>[]) =>
     setTasks((prev) => {
       const newTasks = incoming.map((t, i) => ({ ...t, id: `s-${Date.now()}-${i}` }));
@@ -176,7 +179,7 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
                 demoMode={newsDemoMode}
               />
             </Suspense>
-            <TaskList tasks={tasks} onToggle={toggleTask} />
+            <TaskList tasks={tasks} onToggle={toggleTask} onDelete={deleteTask} />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <PersonalWidget onAddTask={addTask} />
             </Suspense>

@@ -37,7 +37,7 @@ const StudyPlanModal = ({ alert, onClose, onConfirm, existingTaskTitles }: Study
   const initial: EditableTask[] = alert.planTasks
     ? planTasksToTasks(alert.planTasks, alert.dueDate ?? new Date().toISOString().split('T')[0]).map(t => ({
         ...t,
-        enabled: !existingTaskTitles.has(t.title),
+        enabled: true,
       }))
     : [];
 

@@ -161,13 +161,17 @@ const ImportantEmailsModal = ({
     setKeywords(prev => prev.filter(k => k !== kw));
   };
 
-  // Show all emails; just detect which ones match keywords (for badge display)
-  const filteredEmails = emails;
-
   const matchedKeyword = (email: ImportantEmail): string | null => {
     const text = `${email.subject} ${email.snippet ?? ''} ${email.preview ?? ''}`.toLowerCase();
     return keywords.find(kw => text.includes(kw.toLowerCase())) ?? null;
   };
+
+  // Re-sort on every keyword change: matched emails float to top
+  const filteredEmails = [...emails].sort((a, b) => {
+    const aM = matchedKeyword(a) ? 1 : 0;
+    const bM = matchedKeyword(b) ? 1 : 0;
+    return bM - aM;
+  });
 
   const handleAddTask = (email: ImportantEmail) => {
     const { score, urgency, dueDate, reason } = calcEmailPriority(email, keywords);

@@ -6,7 +6,7 @@ import { sortByPriority, priorityLabel, priorityColor, formatDate, isToday, isTo
 // Task Item Component
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TaskItem = ({ task, onToggle }: { task: Task; onToggle: (id: string) => void }) => {
+const TaskItem = ({ task, onToggle, onDelete }: { task: Task; onToggle: (id: string) => void; onDelete: (id: string) => void }) => {
   const color = priorityColor[task.priority];
   const label = priorityLabel[task.priority];
 
@@ -42,6 +42,16 @@ const TaskItem = ({ task, onToggle }: { task: Task; onToggle: (id: string) => vo
         </span>
         <span className="tl-task-category">{task.category}</span>
         <span className="tl-task-date">{dueDateLabel}</span>
+        {task.completed && (
+          <button
+            className="tl-task-delete"
+            onClick={() => onDelete(task.id)}
+            title="מחק משימה"
+            aria-label="מחק"
+          >
+            🗑️
+          </button>
+        )}
       </div>
     </div>
   );
@@ -54,11 +64,12 @@ const TaskItem = ({ task, onToggle }: { task: Task; onToggle: (id: string) => vo
 interface TaskListProps {
   tasks: Task[];
   onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
 type FilterType = 'all' | 'today' | 'urgent' | 'in-progress' | 'done' | 'smart';
 
-const TaskList = ({ tasks, onToggle }: TaskListProps) => {
+const TaskList = ({ tasks, onToggle, onDelete }: TaskListProps) => {
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
 
   const allCount = tasks.length;
@@ -174,7 +185,7 @@ const TaskList = ({ tasks, onToggle }: TaskListProps) => {
           <div className="tl-empty-state">אין משימות בסינון הנבחר.</div>
         ) : (
           filteredTasks.map((task) => (
-            <TaskItem key={task.id} task={task} onToggle={onToggle} />
+            <TaskItem key={task.id} task={task} onToggle={onToggle} onDelete={onDelete} />
           ))
         )}
       </div>

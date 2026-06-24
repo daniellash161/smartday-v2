@@ -7750,3 +7750,69 @@ html.dark .quick-insights-relax .qi-action-chip {
   background: var(--card-secondary);
   color: var(--text);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dark mode — override hardcoded hex colors (texture / border fixes)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* TaskList card */
+html.dark .tl-card { border-color: var(--border); }
+html.dark .tl-header { border-bottom-color: var(--border); }
+html.dark .tl-add-btn { border-color: var(--border); color: var(--primary); background: transparent; }
+html.dark .tl-add-btn:hover { background: var(--surface2); border-color: var(--primary); }
+
+html.dark .tl-summary-strip {
+  background: var(--card-secondary);
+  border-bottom-color: var(--border);
+}
+html.dark .tl-stat-total { background: var(--surface); border-color: var(--border); }
+html.dark .tl-stat-urgent { background: rgba(244,168,184,.12); color: #f4a8b8; }
+html.dark .tl-stat-today  { background: rgba(253,230,138,.10); color: #fde68a; }
+html.dark .tl-stat-done   { background: rgba(134,239,172,.10); color: #86efac; }
+
+html.dark .tl-filters { border-bottom-color: var(--border); }
+html.dark .tl-filter-chip {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+html.dark .tl-filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+html.dark .tl-filter-active { background: var(--primary); border-color: var(--primary); color: #0f172a; }
+
+html.dark .tl-task-item { border-bottom-color: var(--border); }
+html.dark .tl-task-item:hover { background: var(--surface2); }
+html.dark .tl-task-title-done { color: var(--text-muted); }
+html.dark .tl-task-checkbox { border-color: var(--border); }
+html.dark .tl-task-checkbox:hover { border-color: var(--primary); background: var(--surface2); color: var(--primary); }
+
+/* Quick insights card */
+html.dark .quick-insights-card { border-color: var(--border); }
+html.dark .quick-insights-header { border-bottom-color: var(--border); }
+html.dark .quick-insight-btn {
+  background: var(--surface2);
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+html.dark .quick-insight-btn:hover { border-color: var(--primary); color: var(--primary); }
+html.dark .quick-insight-btn--active { background: var(--primary); border-color: var(--primary); color: #0f172a; }
+
+/* Alert items */
+html.dark .alert-item { border-color: var(--border); background: var(--card-secondary); }
+html.dark .alert-item:hover { background: var(--surface2); }
+
+/* General card borders */
+html.dark .card { box-shadow: var(--shadow-sm); }
+
+/* Delete task button */
+.tl-task-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: .9rem;
+  opacity: 0;
+  transition: opacity .15s;
+  padding: 2px 4px;
+  margin-right: 4px;
+}
+.tl-task-item:hover .tl-task-delete { opacity: .7; }
+.tl-task-delete:hover { opacity: 1 !important; }
