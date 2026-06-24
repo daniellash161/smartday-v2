@@ -178,6 +178,15 @@ function clearSavedInsights(): void {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+/** Remove every credit-analysis-related key from localStorage. */
+function clearAllCreditAnalysisStorage(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(REMINDER_TASK_LINKS_KEY);
+    localStorage.removeItem(REMINDER_EVENT_LINKS_KEY);
+  } catch { /* ignore */ }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Formatters
 // ─────────────────────────────────────────────────────────────────────────────
@@ -886,12 +895,15 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       return;
     }
 
+    // Clear any previous analysis state (in-memory + saved view) before starting
     fullReset();
+    setSavedData(null);
     setFile(picked);
     setStep('extracting');
     setProgress('מחלצים טקסט מהקובץ...');
 
     let usedOcr = false;
+    let reachedInsights = false;
 
     try {
       const text = await extractTextFromPdf(picked, (msg) => {
@@ -922,6 +934,7 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       setUnclearRows(rowsFromPaymentRows(allRows.filter(r => r.rowConfidence === 'low')));
 
       // Auto-analyze — skip mandatory review, go directly to insights
+      setProgress('מנתחת את פירוט האשראי...');
       const result = analyzePaymentRows(goodPaymentRows, cc, detectedProvider, text);
       setAnalysis(result);
 
@@ -941,6 +954,7 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       persistInsights(toSave);
       setSavedData(toSave);
       setStep('insights');
+      reachedInsights = true;
 
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : '';
@@ -949,8 +963,15 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
       } else {
         setError(errorMsg || 'לא הצלחנו לקרוא את ה-PDF. ודאי שהקובץ אינו סרוק כתמונה או מוגן בסיסמה.');
       }
+      // On failure: never leave the UI stuck in loading, never show fake results
+      setAnalysis(null);
       setStep('upload');
       setFile(null);
+    } finally {
+      // Always release the loading state and timers
+      if (slowTimer.current) { clearTimeout(slowTimer.current); slowTimer.current = null; }
+      setShowSlowHint(false);
+      if (!reachedInsights) setProgress('');
     }
   };
 
@@ -982,13 +1003,17 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
     setSavedData(toSave);
   };
 
-  // ── Clear saved ──────────────────────────────────────────────────────────────
-  const handleClearSaved = () => {
-    clearSavedInsights();
+  // ── Delete / reset analysis ──────────────────────────────────────────────────
+  // Fully clears the credit analysis: file, extracted text, detected charges,
+  // installments, exceptions, insights/summary, all related localStorage keys,
+  // and returns the section to the initial upload state.
+  const handleClearSaved = useCallback(() => {
+    clearAllCreditAnalysisStorage();
     setSavedData(null);
-    setShowingSaved(false);
-    if (step === 'insights' && !analysis) fullReset();
-  };
+    setAddedTaskIds(new Set());
+    setAddedEventIds(new Set());
+    fullReset();
+  }, [fullReset]);
 
   // ── Add reminders to tasks ───────────────────────────────────────────────────
   const handleAddRemindersToTasks = useCallback((reminders: PaymentReminder[]) => {
@@ -1221,11 +1246,9 @@ const PaymentsInsightsCard = ({ onAddTask, onAddEvent, compact = false, onOpenMo
                 פתח תובנות תשלומים
               </button>
             )}
-            <label className="pi-compact-clear-btn">
-              <input type="file" accept="application/pdf,.pdf"
-                className="payments-file-input" onChange={handleFileChange} />
+            <button className="pi-compact-clear-btn" onClick={handleClearSaved}>
               נקה ניתוח
-            </label>
+            </button>
           </div>
         </div>
       )}

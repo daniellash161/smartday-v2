@@ -72,7 +72,11 @@ const ImportantEmailsCard = lazy(() => import('./ImportantEmailsCard'));
 const PersonalWidget = lazy(() => import('./PersonalWidget'));
 const FutureEventsPanel = lazy(() => import('./FutureEventsPanel'));
 
-const DashboardLayout = () => {
+interface DashboardLayoutProps {
+  onExitToOnboarding?: () => void;
+}
+
+const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
   // Initialize tasks with localStorage cleanup of demo tasks
   const [tasks, setTasks] = useState<Task[]>(() => {
     // Run cleanup migration before loading tasks
@@ -130,7 +134,7 @@ const DashboardLayout = () => {
 
   return (
     <div className="dashboard-root" dir="rtl">
-      <Header />
+      <Header onExitToOnboarding={onExitToOnboarding} />
       <main className="dashboard-main">
         <section className="dashboard-full">
           <DailySummaryCard

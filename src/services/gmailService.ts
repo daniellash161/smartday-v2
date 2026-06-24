@@ -117,7 +117,7 @@ export function gmailIsConnected(): boolean {
  */
 export async function connectGmail(): Promise<void> {
   if (!isGoogleConfigured) {
-    throw new Error('חיבור Google עדיין לא הוגדר בסביבת הפיתוח.');
+    throw new Error('חיבור Google לא מוגדר. יש להוסיף VITE_GOOGLE_CLIENT_ID בסביבת הפריסה.');
   }
 
   // Lazily load the GSI script (may already be present from Calendar)

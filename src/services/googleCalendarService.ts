@@ -114,7 +114,7 @@ export function loadGsiScript(): Promise<void> {
  */
 export async function connectGoogleCalendar(): Promise<void> {
   if (!isGoogleConfigured) {
-    throw new Error('חיבור Google Calendar עדיין לא הוגדר בסביבת הפיתוח.');
+    throw new Error('חיבור Google Calendar לא מוגדר. יש להוסיף VITE_GOOGLE_CLIENT_ID בסביבת הפריסה.');
   }
 
   await loadGsiScript();

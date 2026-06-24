@@ -462,7 +462,7 @@ const EventsCard = ({ events = mockEvents, onAddTasks, existingTaskTitles, onCal
 
   const handleConnect = async () => {
     if (!isGoogleConfigured) {
-      setGcalError('חיבור Google Calendar עדיין לא הוגדר בסביבת הפיתוח.');
+      setGcalError('חיבור Google Calendar לא מוגדר. יש להוסיף VITE_GOOGLE_CLIENT_ID בסביבת הפריסה.');
       return;
     }
     setIsLoading(true);
