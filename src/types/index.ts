@@ -29,6 +29,10 @@ export interface Task {
   deadlineTime?: string;
   status?: TaskStatus;
   source?: string;
+  priorityScore?: number;
+  originalEmailId?: string;
+  originalAlertId?: string;
+  reason?: string;
 }
 
 export interface CalendarEvent {
@@ -53,6 +57,12 @@ export interface Alert {
   type: AlertType;
   urgency: Priority;
   actionLabel?: string;
+  suggestedAction?: string;
+  source?: string;
+  sourceTag?: string;
+  dueDate?: string;
+  priorityScore?: number;
+  reason?: string;
 }
 
 export interface AiMessage {

@@ -118,10 +118,23 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
 
   const addTasks = (incoming: Omit<Task, 'id'>[]) =>
-    setTasks((prev) => [
-      ...prev,
-      ...incoming.map((t, i) => ({ ...t, id: `s-${Date.now()}-${i}` })),
-    ]);
+    setTasks((prev) => {
+      const newTasks = incoming.map((t, i) => ({ ...t, id: `s-${Date.now()}-${i}` }));
+      const combined = [...prev, ...newTasks];
+      // Sort by priorityScore desc, then urgency, then dueDate
+      const urgencyOrder: Record<string, number> = { urgent: 0, critical: 0, high: 1, medium: 2, low: 3 };
+      return combined.sort((a, b) => {
+        const scoreA = (a as any).priorityScore ?? 0;
+        const scoreB = (b as any).priorityScore ?? 0;
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        const uA = urgencyOrder[a.urgency ?? 'low'] ?? 3;
+        const uB = urgencyOrder[b.urgency ?? 'low'] ?? 3;
+        if (uA !== uB) return uA - uB;
+        const dA = a.deadlineDate ?? a.dueDate ?? '';
+        const dB = b.deadlineDate ?? b.dueDate ?? '';
+        return dA.localeCompare(dB);
+      });
+    });
 
   const addTask = (task: Omit<Task, 'id' | 'createdAt'>) =>
     addTasks([task as Omit<Task, 'id'>]);
@@ -169,7 +182,12 @@ const DashboardLayout = ({ onExitToOnboarding }: DashboardLayoutProps) => {
             </Suspense>
           </div>
           <div className="dashboard-col">
-            <AlertsCard calendarEvents={calendarEvents} />
+            <AlertsCard
+              calendarEvents={calendarEvents}
+              tasks={tasks}
+              onAddTask={addTask}
+              existingTaskTitles={existingTaskTitles}
+            />
             <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>טוען...</div>}>
               <PaymentsInsightsCard
                 compact={true}
