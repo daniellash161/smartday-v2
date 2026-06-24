@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useMemo } from 'react';
 import type { Task, CalendarEvent } from '../types';
-import { isToday } from '../utils/priority';
+import { isToday, isTomorrow } from '../utils/priority';
 
 type InsightType = 'urgent' | 'delay' | 'prepare' | 'relax' | null;
 
@@ -12,21 +12,21 @@ interface Props {
 
 const RELAX_TIPS = [
   {
-    text: 'תרגיל נשימה: שאפי 4 שניות, עצרי 4, שחרורי 4.',
+    text: 'תרגיל נשימה: שאפי 4 שניות, עצרי 4, שחרורי 4. חזרי 4 פעמים.',
     links: [
       { label: '🫁 נשימת קופסה', url: 'https://www.youtube.com/watch?v=tEmt1Znux58' },
       { label: '😌 מדיטציה 5 דקות', url: 'https://www.youtube.com/watch?v=inpok4MKVLM' },
     ],
   },
   {
-    text: 'ירידת אנרגיה בצהריים היא ביולוגית. 10-20 דקות שינה קצרה עוזרת.',
+    text: 'ירידת אנרגיה בצהריים היא ביולוגית לגמרי. 10 דקות שכיבה עוזרות יותר מקפה.',
     links: [
       { label: '😴 שינה פלאית 10 דק׳', url: 'https://www.youtube.com/watch?v=gh4G0eu8U1E' },
       { label: '🚶 הליכה קצרה בחוץ', url: 'https://www.youtube.com/watch?v=GQuYCKJNpM0' },
     ],
   },
   {
-    text: 'עבדת הרבה? פומודורו — 25 דקות עבודה, 5 דקות הפסקה.',
+    text: 'ערב טוב לסגור את היום. פומודורו אחרון — 25 דק׳ עבודה, ואז סגרי הכל.',
     links: [
       { label: '⏱️ טיימר פומודורו', url: 'https://www.youtube.com/watch?v=mNBmG24djoY' },
       { label: '🧘 מתיחות קצרות', url: 'https://www.youtube.com/watch?v=tAUf7aajBWE' },
@@ -36,108 +36,200 @@ const RELAX_TIPS = [
 
 function todayStr() { return new Date().toISOString().split('T')[0]; }
 
+function dueDateLabel(t: Task): string {
+  if (isToday(t.dueDate) || isToday(t.deadlineDate ?? '')) return 'היום';
+  if (isTomorrow(t.dueDate) || isTomorrow(t.deadlineDate ?? '')) return 'מחר';
+  const d = t.dueDate || t.deadlineDate;
+  if (!d) return '';
+  const date = new Date(d);
+  return date.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+}
+
+function urgencyColor(t: Task): string {
+  if (t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical') return '#e8738f';
+  if (t.priority === 'medium' || t.urgency === 'medium') return '#f4c76b';
+  return '#7ec98f';
+}
+
+function urgencyText(t: Task): string {
+  if (t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical') return 'דחוף';
+  if (t.priority === 'medium' || t.urgency === 'medium') return 'בינוני';
+  return 'רגיל';
+}
+
 const AiAssistant = ({ tasks = [], calendarEvents = [] }: Props) => {
   const [selectedInsight, setSelectedInsight] = useState<InsightType>(null);
 
-  const insights = useMemo(() => {
+  const data = useMemo(() => {
     const today = todayStr();
+    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+
     const open = tasks.filter(t => !t.completed && t.status !== 'done');
     const urgentTasks = open.filter(t =>
       t.priority === 'high' || t.urgency === 'high' || t.urgency === 'urgent' || t.urgency === 'critical'
     );
     const todayTasks = open.filter(t => isToday(t.dueDate) || isToday(t.deadlineDate ?? ''));
     const deferrable = open.filter(t =>
-      t.priority !== 'high' && t.urgency !== 'high' && t.urgency !== 'urgent' &&
+      t.priority !== 'high' && t.urgency !== 'high' && t.urgency !== 'urgent' && t.urgency !== 'critical' &&
       !isToday(t.dueDate) && !isToday(t.deadlineDate ?? '')
     );
-    const todayEvents = calendarEvents.filter(e => e.date === today);
-    const nextEvent = [...todayEvents].sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
 
-    const urgentContent = urgentTasks.length > 0
-      ? `יש ${urgentTasks.length} משימות דחופות: ${urgentTasks.slice(0, 2).map(t => t.title).join(', ')}${urgentTasks.length > 2 ? '...' : ''}.`
-      : todayTasks.length > 0
-        ? `אין דחיפות גבוהה, אבל יש ${todayTasks.length} משימות לסיום היום.`
-        : 'אין משימות דחופות כרגע. יום טוב לתכנון קדימה.';
-
-    const delayContent = deferrable.length > 0
-      ? `${deferrable.length} משימות ניתנות לדחייה: ${deferrable.slice(0, 2).map(t => t.title).join(', ')}${deferrable.length > 2 ? ' ועוד...' : '.'}`
-      : 'רוב המשימות הפתוחות דחופות או מתוכננות להיום — קשה לדחות כרגע.';
-
-    const prepareContent = nextEvent
-      ? `האירוע הבא: "${nextEvent.title}" בשעה ${nextEvent.startTime}.${urgentTasks.length > 0 ? ` גמרי קודם: ${urgentTasks[0].title}.` : ' כל המשימות הדחופות נקיות.'}`
-      : todayTasks.length > 0
-        ? `${todayTasks.length} משימות מתוכננות להיום. התחילי מהדחופות ביותר.`
-        : 'אין אירועים ביומן היום. יום פנוי לעבודה עמוקה.';
+    const todayEvents = calendarEvents
+      .filter(e => e.date === today && e.source !== 'demo')
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
+    const futureEvents = todayEvents.filter(e => {
+      const [h, m] = e.startTime.split(':').map(Number);
+      return (h * 60 + (m || 0)) > nowMins;
+    });
 
     const hour = new Date().getHours();
-    const relaxTip = hour >= 14 && hour < 16
-      ? RELAX_TIPS[1]
-      : hour >= 21
-        ? RELAX_TIPS[2]
-        : RELAX_TIPS[0];
+    const relaxTip = hour >= 14 && hour < 17 ? RELAX_TIPS[1] : hour >= 20 ? RELAX_TIPS[2] : RELAX_TIPS[0];
 
-    return { urgentContent, delayContent, prepareContent, relaxTip };
+    return { open, urgentTasks, todayTasks, deferrable, todayEvents, futureEvents, relaxTip };
   }, [tasks, calendarEvents]);
 
   const toggle = (t: InsightType) => setSelectedInsight(prev => prev === t ? null : t);
+
+  // ── Render helpers ──────────────────────────────────────────────────────────
+
+  const renderUrgent = () => {
+    const { urgentTasks, todayTasks, futureEvents } = data;
+    const allUrgent = [
+      ...urgentTasks.filter(t => isToday(t.dueDate) || isToday(t.deadlineDate ?? '')),
+      ...urgentTasks.filter(t => !isToday(t.dueDate) && !isToday(t.deadlineDate ?? '')),
+      ...todayTasks.filter(t => !urgentTasks.includes(t)),
+    ].slice(0, 5);
+
+    if (allUrgent.length === 0 && futureEvents.length === 0) {
+      return <p className="qi-empty-msg">אין משימות דחופות כרגע — יום פנוי 🎉</p>;
+    }
+
+    return (
+      <div className="qi-list">
+        {futureEvents.slice(0, 2).map(e => (
+          <div key={e.id} className="qi-item qi-item--event">
+            <span className="qi-item-dot" style={{ background: '#93c5fd' }} />
+            <span className="qi-item-title">{e.title}</span>
+            <span className="qi-item-meta">{e.startTime}</span>
+          </div>
+        ))}
+        {allUrgent.map(t => (
+          <div key={t.id} className="qi-item">
+            <span className="qi-item-dot" style={{ background: urgencyColor(t) }} />
+            <span className="qi-item-title">{t.title}</span>
+            <div className="qi-item-badges">
+              <span className="qi-badge" style={{ background: urgencyColor(t) + '22', color: urgencyColor(t) }}>
+                {urgencyText(t)}
+              </span>
+              {dueDateLabel(t) && (
+                <span className="qi-badge qi-badge--date">{dueDateLabel(t)}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  const renderDelay = () => {
+    const { deferrable } = data;
+    if (deferrable.length === 0) {
+      return <p className="qi-empty-msg">כל המשימות הפתוחות דחופות — אין מה לדחות כרגע.</p>;
+    }
+    return (
+      <div className="qi-list">
+        <p className="qi-list-hint">אלה יכולות לחכות לשבוע הבא:</p>
+        {deferrable.slice(0, 5).map(t => (
+          <div key={t.id} className="qi-item qi-item--muted">
+            <span className="qi-item-dot" style={{ background: '#94a3b8' }} />
+            <span className="qi-item-title">{t.title}</span>
+            {dueDateLabel(t) && (
+              <span className="qi-badge qi-badge--date">{dueDateLabel(t)}</span>
+            )}
+          </div>
+        ))}
+        {deferrable.length > 5 && (
+          <p className="qi-list-more">ועוד {deferrable.length - 5} נוספות</p>
+        )}
+      </div>
+    );
+  };
+
+  const renderPrepare = () => {
+    const { futureEvents, urgentTasks, todayTasks, open } = data;
+
+    if (futureEvents.length === 0 && open.length === 0) {
+      return <p className="qi-empty-msg">אין אירועים או משימות לסנכרן היום.</p>;
+    }
+
+    // Build an interleaved agenda: events + urgent tasks sorted
+    const agendaItems: { type: 'event' | 'task'; title: string; meta?: string; color?: string }[] = [];
+
+    futureEvents.slice(0, 3).forEach(e => {
+      agendaItems.push({ type: 'event', title: e.title, meta: `${e.startTime}`, color: '#93c5fd' });
+    });
+
+    const tasksToShow = [
+      ...urgentTasks.filter(t => isToday(t.dueDate) || isToday(t.deadlineDate ?? '')),
+      ...urgentTasks.filter(t => !isToday(t.dueDate) && !isToday(t.deadlineDate ?? '')),
+      ...todayTasks.filter(t => !urgentTasks.includes(t)),
+    ].slice(0, 3);
+
+    tasksToShow.forEach(t => {
+      agendaItems.push({ type: 'task', title: t.title, meta: dueDateLabel(t), color: urgencyColor(t) });
+    });
+
+    return (
+      <div className="qi-list">
+        {futureEvents.length === 0 && (
+          <p className="qi-list-hint">אין אירועים ביומן — יום פנוי לעבודה:</p>
+        )}
+        {agendaItems.map((item, i) => (
+          <div key={i} className={`qi-item ${item.type === 'event' ? 'qi-item--event' : ''}`}>
+            <span className="qi-item-dot" style={{ background: item.color }} />
+            <span className="qi-item-icon">{item.type === 'event' ? '📅' : '✅'}</span>
+            <span className="qi-item-title">{item.title}</span>
+            {item.meta && <span className="qi-badge qi-badge--date">{item.meta}</span>}
+          </div>
+        ))}
+        {agendaItems.length === 0 && <p className="qi-empty-msg">הכל בסדר! 🎉</p>}
+      </div>
+    );
+  };
 
   return (
     <section className="quick-insights-card">
       <header className="quick-insights-header">
         <div>
           <h3>תובנות מהירות</h3>
-          <p>סיכומים קצרים שיעזרו לך להבין מה חשוב עכשיו</p>
+          <p>לחצי שאלה לתשובה מותאמת ליום שלך</p>
         </div>
         <span className="quick-insights-icon">✦</span>
       </header>
 
       <div className="quick-insights-actions">
-        <button
-          className={`quick-insight-btn ${selectedInsight === 'urgent' ? 'quick-insight-btn--active' : ''}`}
-          onClick={() => toggle('urgent')}
-        >
-          מה דחוף היום?
-        </button>
-        <button
-          className={`quick-insight-btn ${selectedInsight === 'delay' ? 'quick-insight-btn--active' : ''}`}
-          onClick={() => toggle('delay')}
-        >
-          מה אפשר לדחות?
-        </button>
-        <button
-          className={`quick-insight-btn ${selectedInsight === 'prepare' ? 'quick-insight-btn--active' : ''}`}
-          onClick={() => toggle('prepare')}
-        >
-          איך להתכונן ליום?
-        </button>
-        <button
-          className={`quick-insight-btn quick-insight-btn--relax ${selectedInsight === 'relax' ? 'quick-insight-btn--active' : ''}`}
-          onClick={() => toggle('relax')}
-        >
-          🌬️ רגע של רוגע
-        </button>
+        {(['urgent', 'delay', 'prepare', 'relax'] as const).map(type => (
+          <button
+            key={type}
+            className={`quick-insight-btn ${type === 'relax' ? 'quick-insight-btn--relax' : ''} ${selectedInsight === type ? 'quick-insight-btn--active' : ''}`}
+            onClick={() => toggle(type)}
+          >
+            {type === 'urgent' && '🔥 מה דחוף היום?'}
+            {type === 'delay'  && '⏸️ מה אפשר לדחות?'}
+            {type === 'prepare' && '🗓️ אג׳נדה להיום'}
+            {type === 'relax'  && '🌬️ רגע של רוגע'}
+          </button>
+        ))}
       </div>
 
-      {selectedInsight === 'urgent' && (
-        <div className="quick-insights-result">
-          <p>{insights.urgentContent}</p>
-        </div>
-      )}
-      {selectedInsight === 'delay' && (
-        <div className="quick-insights-result">
-          <p>{insights.delayContent}</p>
-        </div>
-      )}
-      {selectedInsight === 'prepare' && (
-        <div className="quick-insights-result">
-          <p>{insights.prepareContent}</p>
-        </div>
-      )}
-      {selectedInsight === 'relax' && (
+      {selectedInsight === 'urgent'  && <div className="quick-insights-result">{renderUrgent()}</div>}
+      {selectedInsight === 'delay'   && <div className="quick-insights-result">{renderDelay()}</div>}
+      {selectedInsight === 'prepare' && <div className="quick-insights-result">{renderPrepare()}</div>}
+      {selectedInsight === 'relax'   && (
         <div className="quick-insights-result quick-insights-relax">
-          <p>{insights.relaxTip.text}</p>
+          <p>{data.relaxTip.text}</p>
           <div className="qi-actions">
-            {insights.relaxTip.links.map(l => (
+            {data.relaxTip.links.map(l => (
               <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="qi-action-chip">
                 {l.label}
               </a>
@@ -147,7 +239,7 @@ const AiAssistant = ({ tasks = [], calendarEvents = [] }: Props) => {
       )}
       {!selectedInsight && (
         <div className="quick-insights-empty">
-          בחרי שאלה מהירה כדי לקבל תובנה על היום שלך.
+          לחצי על שאלה כדי לקבל תובנה מותאמת אישית על היום שלך.
         </div>
       )}
     </section>
