@@ -8021,3 +8021,24 @@ html.dark .qi-badge--date { background: var(--surface2); border-color: var(--bor
   margin: 0;
   letter-spacing: -.01em;
 }
+
+/* DailySummaryCard — context banner */
+.ds2-context-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: linear-gradient(135deg, #f0faf8 0%, #e8f4ff 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.ds2-context-emoji { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.ds2-context-text  { font-size: .88rem; font-weight: 600; color: var(--text); line-height: 1.5; }
+
+.ds2-label--muted { color: var(--text-muted) !important; font-weight: 500; }
+
+html.dark .ds2-context-banner {
+  background: linear-gradient(135deg, #1a2b32 0%, #1e2d3e 100%);
+  border-color: var(--border);
+}
