@@ -175,9 +175,17 @@ const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
  * Excludes Gmail's automated category tabs (Promotions, Social, Updates,
  * Forums) because those rarely contain actionable emails.
  */
-// Relaxed query: includes both read and unread emails from last 30 days
-// Removes unread-only filter to catch important emails user may have already read
-const IMPORTANCE_QUERY = 'newer_than:30d -category:promotions -category:social -category:forums -category:updates';
+const KEYWORDS_STORAGE_KEY = 'smartdayEmailKeywords';
+
+function loadUserKeywords(): string[] {
+  try {
+    const stored = localStorage.getItem(KEYWORDS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch { return []; }
+}
+
+// Base query — excludes noise tabs; keywords appended dynamically below
+const BASE_QUERY = 'newer_than:30d -category:promotions -category:social -category:forums -category:updates';
 
 /**
  * Fetch recent unread emails, classify them locally with strict actionability
@@ -198,9 +206,17 @@ export async function fetchImportantEmails(): Promise<ImportantEmail[]> {
   }
 
   // ── Step 1: list matching message IDs ──────────────────────────────────────
+  const userKeywords = loadUserKeywords();
+  // Build query: base + OR clause for each user keyword so Gmail pre-filters for them
+  let query = BASE_QUERY;
+  if (userKeywords.length > 0) {
+    const kwClause = userKeywords.map(k => `"${k}"`).join(' OR ');
+    query = `(${BASE_QUERY}) OR (newer_than:30d (${kwClause}))`;
+  }
+
   const listUrl = new URL(`${GMAIL_API_BASE}/messages`);
-  listUrl.searchParams.set('q',          IMPORTANCE_QUERY);
-  listUrl.searchParams.set('maxResults', '30');
+  listUrl.searchParams.set('q',          query);
+  listUrl.searchParams.set('maxResults', '50');
 
   const listRes = await fetch(listUrl.toString(), {
     headers: { Authorization: `Bearer ${_gmailToken}` },
@@ -223,9 +239,9 @@ export async function fetchImportantEmails(): Promise<ImportantEmail[]> {
   const rawMessages = await Promise.all(ids.map(id => _fetchMessageMetadata(id)));
   const valid = rawMessages.filter((m): m is GmailMessage => m !== null);
 
-  // ── Step 3: classify (null = not actionable) → sort → cap at 5 ───────────
+  // ── Step 3: classify → sort → cap at 15 ──────────────────────────────────
   const emails = valid
-    .map(mapGmailMessageToSmartDayEmail)
+    .map(m => mapGmailMessageToSmartDayEmail(m, userKeywords))
     .filter((e): e is ImportantEmail => e !== null);
 
   const SORT_ORDER: Record<EmailImportance, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
@@ -235,7 +251,7 @@ export async function fetchImportantEmails(): Promise<ImportantEmail[]> {
     return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime();
   });
 
-  return emails.slice(0, 5);
+  return emails.slice(0, 15);
 }
 
 /** Fetch a single message's metadata (headers + snippet + labelIds). */
@@ -270,7 +286,7 @@ async function _fetchMessageMetadata(id: string): Promise<GmailMessage | null> {
  * rules: urgency keywords, deadline phrases, payment problems, meeting
  * invites/changes, or messages from important senders/domains.
  */
-export function mapGmailMessageToSmartDayEmail(raw: GmailMessage): ImportantEmail | null {
+export function mapGmailMessageToSmartDayEmail(raw: GmailMessage, userKeywords: string[] = []): ImportantEmail | null {
   // ── Parse headers ──────────────────────────────────────────────────────────
   const headers   = raw.payload?.headers ?? [];
   const getHeader = (name: string) =>
@@ -285,7 +301,7 @@ export function mapGmailMessageToSmartDayEmail(raw: GmailMessage): ImportantEmai
   const text    = `${subject} ${raw.snippet}`.toLowerCase();
 
   // ── Classify — returns null if not actionable ──────────────────────────────
-  const cls = _classifyEmail(text, senderEmail, ageDays);
+  const cls = _classifyEmail(text, senderEmail, ageDays, userKeywords);
   if (!cls.actionable) return null;
 
   return {
@@ -371,9 +387,10 @@ const NOT_ACTIONABLE: EmailClassification = {
  * that don't match any rule are silently dropped.
  */
 function _classifyEmail(
-  text:        string,
-  senderEmail: string,
-  ageDays:     number,
+  text:         string,
+  senderEmail:  string,
+  ageDays:      number,
+  userKeywords: string[] = [],
 ): EmailClassification {
   const domain = senderEmail.split('@')[1]?.toLowerCase() ?? '';
 
@@ -458,6 +475,22 @@ function _classifyEmail(
       category,
       recommendedAction: category === 'meeting' ? 'addEvent' : 'addTask',
     };
+  }
+
+  // ── Rule 6: User-defined keywords ──────────────────────────────────────────
+  if (userKeywords.length > 0) {
+    const lowerText = text; // already lowercased above
+    const matched = userKeywords.find(kw => lowerText.includes(kw.toLowerCase()));
+    if (matched) {
+      const category = _deriveCategory(text, domain);
+      return {
+        actionable: true,
+        reason:     `תווית: "${matched}"`,
+        importance: 'medium',
+        category,
+        recommendedAction: _deriveAction(category, text),
+      };
+    }
   }
 
   return NOT_ACTIONABLE;
