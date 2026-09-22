@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SmartDay - Your whole day on one screen</title>
+<meta name="description" content="SmartDay is a Hebrew-first personal dashboard that brings calendars, email, tasks and credit-card statement insights into one morning view. Built with React and TypeScript by Daniella Shemesh.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --surface: #ffffff;
+    --ink: #172033;
+    --muted: #5d6879;
+    --line: #e3e9f0;
+    --sky: #7db7e8;
+    --sky-deep: #2f6fa8;
+    --teal: #3fafa3;
+    --mint: #dff4ec;
+    --lavender: #ece8ff;
+    --beige: #f4e8d2;
+    --pink: #fbe4ea;
+    --rose: #c9546f;
+    --display: "Bricolage Grotesque", "Rubik", system-ui, sans-serif;
+    --body: "Rubik", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1419;
+      --surface: #1a1e26;
+      --ink: #e8ecf1;
+      --muted: #a8b2c1;
+      --line: #2e3642;
+      --sky: #6a9fce;
+      --sky-deep: #9cc6ee;
+      --teal: #5ab39c;
+      --mint: #1a4a40;
+      --lavender: #2a2844;
+      --beige: #3a3028;
+      --pink: #4a2835;
+      --rose: #e8738f;
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; border-radius: 6px; }
+  .wrap { width: min(1120px, 100% - 40px); margin-inline: auto; }
+
+  /* Nav */
+  nav { padding-block: 22px; }
+  nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { font-family: var(--display); font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 26px; height: 26px; border-radius: 50%; background: conic-gradient(from 200deg, var(--sky), var(--teal), var(--sky)); display: inline-block; }
+  .nav-links { display: flex; gap: 18px; font-size: 0.95rem; }
+  .nav-links a { text-decoration: none; color: var(--muted); white-space: nowrap; }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* Hero */
+  .hero { padding-block: 48px 88px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center; }
+  h1 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(2.6rem, 5.6vw, 4.4rem);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    max-width: 12ch;
+  }
+  .lede { margin-top: 22px; font-size: 1.15rem; color: var(--muted); max-width: 46ch; }
+  .actions { margin-top: 32px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 13px 22px; border-radius: 999px;
+    font-weight: 600; font-size: 1rem; text-decoration: none;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-ghost { border: 1.5px solid var(--line); background: var(--surface); }
+  .btn-ghost:hover { border-color: var(--sky); }
+  .hero-note { margin-top: 18px; font-size: 0.88rem; color: var(--muted); }
+
+  /* The morning mock — the one bold element */
+  .morning {
+    direction: rtl;
+    background: var(--surface);
+    border-radius: 28px;
+    padding: 26px;
+    box-shadow: 0 30px 60px -30px rgba(23, 32, 51, .28), 0 0 0 1px var(--line);
+    position: relative;
+  }
+  .morning::before {
+    content: "";
+    position: absolute; inset: -18px -18px auto auto;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, var(--beige), transparent 70%);
+    z-index: -1;
+  }
+  .m-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+  .m-greet { font-weight: 600; font-size: 1.35rem; }
+  .m-date { color: var(--muted); font-size: 0.9rem; }
+  .m-brief {
+    background: var(--lavender); border-radius: 18px; padding: 16px 18px; margin-bottom: 14px;
+    font-size: 0.97rem;
+  }
+  .m-brief strong { font-weight: 600; }
+  .m-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .m-tile { border-radius: 18px; padding: 14px 16px; font-size: 0.9rem; }
+  .m-tile h4 { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+  .m-events { background: var(--mint); grid-column: span 2; }
+  .m-event { display: flex; gap: 12px; padding-block: 5px; }
+  .m-event time { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 44px; }
+  .m-alert { background: var(--pink); }
+  .m-pay { background: var(--beige); }
+  .m-tile p { line-height: 1.45; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .morning > * { opacity: 0; transform: translateY(8px); animation: rise .5s ease forwards; }
+    .morning > *:nth-child(1) { animation-delay: .15s; }
+    .morning > *:nth-child(2) { animation-delay: .45s; }
+    .morning > *:nth-child(3) { animation-delay: .75s; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+  }
+
+  /* Sections */
+  section { padding-block: 80px; }
+  .band { background: var(--surface); border-block: 1px solid var(--line); }
+  h2 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.8rem, 3.4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    max-width: 22ch;
+  }
+  .section-lede { margin-top: 14px; color: var(--muted); max-width: 60ch; font-size: 1.05rem; }
+
+  /* Sources */
+  .sources { margin-top: 44px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 28px 30px; list-style: none; }
+  .sources li { border-top: 3px solid var(--chip); padding-top: 16px; }
+  .sources h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 6px; }
+  .sources p { color: var(--muted); font-size: 0.95rem; }
+
+  /* Pipeline — a real sequence, so numbered */
+  .pipeline { margin-top: 48px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; list-style: none; counter-reset: step; }
+  .pipeline li { counter-increment: step; padding: 0 20px 0 0; position: relative; }
+  .pipeline li::before {
+    content: counter(step);
+    display: grid; place-items: center;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--surface); border: 2px solid var(--teal); color: var(--ink);
+    font-family: var(--display); font-weight: 700;
+    margin-bottom: 16px; position: relative; z-index: 1;
+  }
+  .pipeline li:not(:last-child)::after {
+    content: ""; position: absolute; top: 19px; left: 38px; right: 0;
+    height: 2px; background: var(--line);
+  }
+  .pipeline h3 { font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+  .pipeline p { font-size: 0.92rem; color: var(--muted); }
+  .privacy {
+    margin-top: 44px; padding: 20px 24px; border-radius: 18px;
+    background: var(--mint); max-width: 70ch; font-size: 0.98rem;
+  }
+
+  /* Engineering */
+  .eng { display: grid; grid-template-columns: 1fr 1.3fr; gap: 56px; align-items: start; }
+  .stack { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; list-style: none; }
+  .stack li { padding: 6px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 0.9rem; }
+  .decisions { list-style: none; display: grid; gap: 26px; }
+  .decisions h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+  .decisions p { color: var(--muted); font-size: 0.97rem; max-width: 60ch; }
+
+  /* Footer */
+  footer { padding-block: 56px; border-top: 1px solid var(--line); }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+  footer p { color: var(--muted); font-size: 0.95rem; }
+  footer strong { color: var(--ink); font-weight: 600; }
+  .foot-links { display: flex; gap: 20px; }
+  .foot-links a { color: var(--sky-deep); font-weight: 500; }
+
+  @media (max-width: 900px) {
+    .hero .wrap, .eng { grid-template-columns: 1fr; gap: 44px; }
+    .pipeline { grid-template-columns: 1fr; gap: 26px; }
+    .pipeline li { padding: 0 0 0 58px; }
+    .pipeline li::before { position: absolute; left: 0; top: 0; margin: 0; }
+    .pipeline li::after { display: none; }
+  }
+  @media (max-width: 520px) {
+    .nav-links a:first-child { display: none; }
+    .m-row { grid-template-columns: 1fr; }
+    .m-events { grid-column: auto; }
+    section { padding-block: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#"><span class="brand-mark" aria-hidden="true"></span>SmartDay</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="https://github.com/daniellash161/smartday-v2">Source code</a>
+      <a href="https://smartday-v2.vercel.app">Live demo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Your whole day on one screen.</h1>
+      <p class="lede">SmartDay is a Hebrew-first personal dashboard. It pulls your calendars, important email, tasks and card statements into a single morning view, then tells you what needs attention first.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://smartday-v2.vercel.app">Open the live demo</a>
+        <a class="btn btn-ghost" href="https://github.com/daniellash161/smartday-v2">View the code on GitHub</a>
+      </div>
+      <p class="hero-note">React, TypeScript and Vite. Runs entirely in the browser.</p>
+    </div>
+
+    <div class="morning" aria-label="Example of the SmartDay morning view, in Hebrew">
+      <div class="m-head">
+        <span class="m-greet">בוקר טוב 👋</span>
+        <span class="m-date" id="today"></span>
+      </div>
+      <div class="m-brief">
+        <strong>הסיכום שלך להיום:</strong> 3 אירועים, משימה אחת דחופה, ומבחן מחר. כדאי להתחיל מהגשת התרגיל.
+      </div>
+      <div class="m-row">
+        <div class="m-tile m-events">
+          <h4>היום ביומן</h4>
+          <div class="m-event"><time>09:30</time><span>הרצאה - מסדי נתונים</span></div>
+          <div class="m-event"><time>13:00</time><span>פגישת צוות</span></div>
+          <div class="m-event"><time>17:45</time><span>הגשת תרגיל 4</span></div>
+        </div>
+        <div class="m-tile m-alert">
+          <h4>התראה</h4>
+          <p>מבחן מחר. אפשר לבנות תוכנית למידה ולהוסיף אותה ליומן.</p>
+        </div>
+        <div class="m-tile m-pay">
+          <h4>תובנה מהפירוט</h4>
+          <p>זוהה מנוי חודשי חדש בכרטיס האשראי.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="band">
+  <div class="wrap">
+    <h2>Everything that shapes your day, in one place</h2>
+    <p class="section-lede">Instead of opening five apps every morning, SmartDay connects to the sources you already use and reads them for you.</p>
+    <ul class="sources">
+      <li style="--chip: var(--sky)">
+        <h3>Google Calendar</h3>
+        <p>Today's and upcoming events, automatically sorted into categories like study, work and personal.</p>
+      </li>
+      <li style="--chip: var(--teal)">
+        <h3>Apple Calendar</h3>
+        <p>Import any ICS file to bring in events from iCloud or other calendar apps.</p>
+      </li>
+      <li style="--chip: var(--rose)">
+        <h3>Gmail</h3>
+        <p>Surfaces important emails with read-only access. SmartDay can never send or delete anything.</p>
+      </li>
+      <li style="--chip: #c49a3c">
+        <h3>Card statements</h3>
+        <p>Upload a PDF statement to spot subscriptions, standing orders, installments and unusual charges.</p>
+      </li>
+      <li style="--chip: #9a8ce0">
+        <h3>Tasks and alerts</h3>
+        <p>Suggested tasks and smart alerts generated from your events, prioritized by what's due soonest.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How a PDF statement becomes an insight</h2>
+    <p class="section-lede">The most technical part of SmartDay: a document pipeline that handles both digital and scanned statements, without a server.</p>
+    <ol class="pipeline">
+      <li>
+        <h3>Upload</h3>
+        <p>You drop in a PDF statement from an Israeli credit-card provider.</p>
+      </li>
+      <li>
+        <h3>Read the text layer</h3>
+        <p>PDF.js extracts native text first, which is fast and exact for digital files.</p>
+      </li>
+      <li>
+        <h3>Fall back to OCR</h3>
+        <p>Scanned pages are rendered to a canvas and read with Tesseract.js running as WebAssembly.</p>
+      </li>
+      <li>
+        <h3>Detect and parse</h3>
+        <p>The provider is identified and only transaction-relevant lines are kept.</p>
+      </li>
+      <li>
+        <h3>Classify</h3>
+        <p>Rules flag subscriptions, standing orders, installments and unusual charges.</p>
+      </li>
+    </ol>
+    <p class="privacy"><strong>Privacy by design.</strong> The file never leaves your browser. Raw text, card numbers and IDs are not stored; only the processed insights are kept.</p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap eng">
+    <div>
+      <h2>Under the hood</h2>
+      <p class="section-lede">A fully client-side React app, designed and built end to end.</p>
+      <ul class="stack">
+        <li>React 18</li>
+        <li>TypeScript</li>
+        <li>Vite</li>
+        <li>PDF.js</li>
+        <li>Tesseract.js (WASM)</li>
+        <li>Google Calendar API</li>
+        <li>Gmail API</li>
+        <li>ICS parsing</li>
+        <li>Vercel</li>
+      </ul>
+    </div>
+    <ul class="decisions">
+      <li>
+        <h3>No backend, on purpose</h3>
+        <p>All parsing, OCR and analysis run in the browser. Personal data like statements and email stays on the user's device.</p>
+      </li>
+      <li>
+        <h3>Least-privilege integrations</h3>
+        <p>Gmail uses the read-only scope, so the app can surface messages but has no way to change them.</p>
+      </li>
+      <li>
+        <h3>Rule-based, explainable logic</h3>
+        <p>Priorities, alerts and daily insights come from transparent rules over your events and tasks, so every suggestion can be traced to its cause.</p>
+      </li>
+      <li>
+        <h3>Built for Hebrew</h3>
+        <p>A right-to-left interface from the ground up, with light and dark themes and a guided onboarding flow.</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Designed and built by <strong>Daniella Shemesh</strong>, software engineer.</p>
+    <div class="foot-links">
+      <a href="https://www.linkedin.com/in/daniella-shemesh-6b5065235">LinkedIn</a>
+      <a href="https://github.com/daniellash161">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  try {
+    document.getElementById('today').textContent =
+      new Date().toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+  } catch (e) {}
+</script>
+</body>
+</html>
