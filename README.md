@@ -1,8 +1,12 @@
 # SmartDay
 
-A Hebrew-first personal dashboard that brings calendars, important emails, tasks, and payment insights into one place.
+### Personal Productivity & Schedule Intelligence Platform
 
-SmartDay turns information from everyday sources into a clearer view of what needs attention, with a focus on document processing and explainable automation.
+A Hebrew-first, client-side application that brings calendar events, important emails, tasks, and payment insights into a unified daily view.
+
+Its core is an in-browser document processing pipeline that converts credit-card statement PDFs into structured transactions using PDF.js and Tesseract.js OCR. Rule-based logic identifies recurring payments and installments, flags potentially unusual charges, and generates task suggestions from calendar context.
+
+Google Calendar and Gmail integrations use read-only OAuth access. Document extraction and OCR run locally in the browser.
 
 [Project website](https://daniellash161.github.io/smartday-v2/)
 
@@ -89,6 +93,6 @@ Extraction quality depends on document layout, scan quality, and supported state
 
 ## Project Context and Contribution
 
-SmartDay was developed as a team project. Daniella Shemesh developed most of the application.
+SmartDay was developed as a team project. Daniella Shemesh developed most of the application, including the document processing pipeline, rule-based payment analysis and task suggestions, and calendar and email integrations.
 
-The project combines application development with practical data processing: extracting information from documents, converting it into structured records, and presenting understandable insights.
+The project demonstrates practical experience in data extraction, structured transaction processing, application logic, and API integration.
